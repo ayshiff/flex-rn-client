@@ -2,8 +2,9 @@ import React from 'react'
 
 import { View, Text, Button } from 'react-native'
 import { AsyncStorage } from 'react-native';
-import config from '../config/api';
-import server from '../config/server';
+import config from '../../config/api';
+import server from '../../config/server';
+import styles from './LeaveScreenStyles';
 
 class LeaveScreen extends React.Component {
   static navigationOptions = {
@@ -28,9 +29,9 @@ class LeaveScreen extends React.Component {
   }
 
   leavePlace(ctx) {
-    var ctx = ctx || window;
+    ctx = ctx || window;
 
-    var payload = {
+    let payload = {
         name: ctx.state.name,
         fname: ctx.state.fname,
         id_user: ctx.state.id,
@@ -45,13 +46,13 @@ class LeaveScreen extends React.Component {
         "x-access-token": config.token
       }
     })
-    .then(function(res){
+    .then(res => {
       if(res.ok)
         return res.json();
       else
         ctx.setState({debug:'ERROR'});
     })
-    .then(function(data){
+    .then(data => {
       ctx.state.debug = 'Leave';
       ctx.state.place = '';
       AsyncStorage.setItem('USER', JSON.stringify(ctx.state));
@@ -71,9 +72,9 @@ class LeaveScreen extends React.Component {
 
   render() {
     return (
-      <View style={{justifyContent:'center', alignItems:'center'}}>
+      <View style={styles.view}>
         <Text>{this.state.fname} {this.state.name} [{this.state.id}]: {this.state.place}</Text>
-        <Button title='Leave place'
+        <Button style={styles.button} title='Leave place'
         color="#000"
         onPress={() => this.leavePlace(this)}/>
       </View>

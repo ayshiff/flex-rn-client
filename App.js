@@ -5,7 +5,7 @@ import server from './config/server';
 
 export default class App extends React.Component {
   componentWillMount(){
-    var payload = {
+    let payload = {
         email: config.email,
         password: config.password
     };

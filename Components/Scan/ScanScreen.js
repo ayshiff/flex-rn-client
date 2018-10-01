@@ -2,13 +2,13 @@
 
 import React, { Component } from 'react';
 import { AsyncStorage } from 'react-native';
-import config from '../config/api';
-import server from '../config/server';
+import config from '../../config/api';
+import server from '../../config/server';
+import styles from './ScanScreenStyles';
 
 
 import {
   AppRegistry,
-  StyleSheet,
   Text,
   TouchableOpacity,
   Linking,
@@ -48,17 +48,17 @@ class ScanScreen extends Component {
     navigation.navigate(str);
   }
 
-  onSuccess(e) {
-    this.setState( { place:e.data });
+  onSuccess = e => {
+    this.setState( { place: e.data });
     this.getPlaces(this, this.sendToServ);
   }
 
     sendToServ(ctx, json) {
       if(ctx.state.name != '' && ctx.state.fname != '' && ctx.state.id != '' && ctx.state.place != '')
       {
-        var ctx = ctx || window;
+        let ctx = ctx || window;
 
-        var payload = {
+        let payload = {
             name: ctx.state.name,
             fname: ctx.state.fname,
             id_user: ctx.state.id,
@@ -77,7 +77,7 @@ class ScanScreen extends Component {
           return res.json();
         })
         .then(function(data){
-          var redirect = true;
+          let redirect = true;
           json.forEach(function(element){
             if(payload.id_place == element.id && element.using)
               redirect = false;
@@ -103,8 +103,8 @@ class ScanScreen extends Component {
           "x-access-token": config.token
         }
       })
-      .then(function(res){ return res.json(); })//transform data to json
-      .then(function(data)
+      .then(res => res.json())//transform data to json
+      .then(data =>
       {
         fn(ctx, data);
       });
@@ -113,7 +113,7 @@ class ScanScreen extends Component {
   render() {
     return (
       <QRCodeScanner
-        onRead={this.onSuccess.bind(this)}
+        onRead={this.onSuccess()}
         topContent={
           <Text style={styles.centerText}>
             Scan the QR code.
@@ -123,25 +123,5 @@ class ScanScreen extends Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  centerText: {
-    flex: 1,
-    fontSize: 18,
-    padding: 32,
-    color: '#777',
-  },
-  textBold: {
-    fontWeight: '500',
-    color: '#000',
-  },
-  buttonText: {
-    fontSize: 21,
-    color: 'rgb(0,122,255)',
-  },
-  buttonTouchable: {
-    padding: 16,
-  },
-});
 
 export default ScanScreen;

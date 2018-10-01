@@ -1,10 +1,10 @@
 import React from 'react';
 import { createStackNavigator } from 'react-navigation';
-import HomeScreen from '../Components/HomeScreen';
-import LoginScreen from '../Components/LoginScreen';
-import ProfileScreen from '../Components/ProfileScreen';
-import LeaveScreen from '../Components/LeaveScreen';
-import ScanScreen from '../Components/ScanScreen';
+import HomeScreen from '../Components/Home/HomeScreen';
+import LoginScreen from '../Components/Login/LoginScreen';
+import ProfileScreen from '../Components/Profile/ProfileScreen';
+import LeaveScreen from '../Components/Leave/LeaveScreen';
+import ScanScreen from '../Components/Scan/ScanScreen';
 
 const NavigationApp = createStackNavigator ({
   Home: { screen: HomeScreen },

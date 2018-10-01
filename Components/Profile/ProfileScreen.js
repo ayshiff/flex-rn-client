@@ -2,8 +2,10 @@ import React from 'react'
 
 import { View, Text, Button, TextInput } from 'react-native'
 import { AsyncStorage } from 'react-native';
-import config from '../config/api';
-import server from '../config/server';
+import config from '../../config/api';
+import server from '../../config/server';
+import styles from './ProfileScreenStyles';
+import {  } from 'ramda';
 
 
 class ProfileScreen extends React.Component {
@@ -35,9 +37,9 @@ class ProfileScreen extends React.Component {
   sendToServ(ctx, json) {
     if(ctx.state.name != '' && ctx.state.fname != '' && ctx.state.id != '' && ctx.state.place != '')
     {
-      var ctx = ctx || window;
+      ctx = ctx || window;
 
-      var payload = {
+      let payload = {
           name: ctx.state.name,
           fname: ctx.state.fname,
           id_user: ctx.state.id,
@@ -52,18 +54,16 @@ class ProfileScreen extends React.Component {
           "x-access-token": config.token
         }
       })
-      .then(function(res){
-        return res.json();
-      })
-      .then(function(data){
+      .then(res => res.json())
+      .then(data => {
         var redirect = true;
-        json.forEach(function(element){
+        json.forEach(element => {
           if(payload.id_place == element.id && element.using)
             redirect = false;
         });
         if(redirect)
         {
-          ctx.state.debug = 'Wellcome';
+          ctx.state.debug = 'Welcome';
           AsyncStorage.setItem('USER', JSON.stringify(ctx.state));
 
           ctx.goTo('Leave');
@@ -82,21 +82,17 @@ class ProfileScreen extends React.Component {
         "x-access-token": config.token
       }
     })
-    .then(function(res){ return res.json(); })//transform data to json
-    .then(function(data)
+    .then(res => res.json())//transform data to json
+    .then(data =>
     {
       fn(ctx, data);
     });
   }
 
   async setDebug(ctx, json) {
-    var result = '';
-    json.forEach(function(element){
-      if(!element.using)
-      {
-        result += element.id + ',';
-      }
-    });
+    const result = json
+    .map(element => !element.using ? element.id : null)
+    .reduce((Accumulator, currentValue) => currentValue !== null ? Accumulator + ',' + currentValue : null)
     ctx.setState({debug:result});
   }
 
@@ -113,53 +109,60 @@ class ProfileScreen extends React.Component {
 
   render() {
     const navigation = this.props.navigation;
+    const { fname, name, id, debug } = this.state;
 
     return (
-      <View style={{flexDirection:'column',}}>
+      <View style={styles.view}>
 
-        <View style={{flexDirection: 'row', justifyContent: 'space-between',margin:5}}>
-          <Text style={{margin:5, marginTop:8}}>{this.state.fname} {this.state.name} [{this.state.id}]</Text>
+        <View style={styles.view_second}>
+          <Text style={styles.text_first}>{fname} {name} [{id}]</Text>
 
-          <Button title='Log Out'
+          <Button
+          style={styles.logOut}
+          title='Log Out'
           color="#000"
           onPress={() => this._logOut()}/>
         </View>
 
-        <View style={{ borderRadius: 4, borderWidth: 0.5,}}/>
+        <View style={styles.view_third}/>
 
-        <Text style={{marginLeft:10,marginTop:20}}>Insertion manuelle</Text>
+        <Text style={styles.manualInsertion}>Insertion manuelle</Text>
 
-        <View style={{margin:10, borderRadius: 4, borderWidth: 0.5,marginRight:50,marginLeft:50}}>
+        <View style={styles.place}>
           <TextInput
             placeholder="Place"
             onChangeText={(text) => this.setState({place:text})}
           />
         </View>
 
-        <View style={{marginRight:50,marginLeft:50,}}>
-          <Button title='Send'
+        <View style={styles.sendContainer}>
+          <Button
+          style={styles.send}
+          title='Send'
           color="#000"
           onPress={() => this.getPlaces(this, this.sendToServ)}/>
         </View>
 
-        <View style={{ marginTop:20, borderRadius: 4, borderWidth: 0.5,}}/>
+        <View style={styles.view_fourth}/>
 
-        <Text style={{marginLeft:10,marginTop:20}}>Scan QR code</Text>
+        <Text style={styles.scanQRCode}>Scan QR code</Text>
 
-        <View style={{margin:20, marginRight:50, marginLeft:50, justifyContent:'flex-end'}}>
-          <Button title='Scan'
+        <View style={styles.scan_container}>
+          <Button
+          style={styles.scan}
+          title='Scan'
           color="#000"
           onPress={() => navigation.navigate('Scan') }/>
         </View>
 
-        <View style={{ marginTop:20, borderRadius: 4, borderWidth: 0.5,}}/>
+        <View style={styles.view_fifth}/>
 
-        <View style={{marginTop:20,marginLeft:50, marginRight:50}}>
+        <View style={styles.emptyPlaces_container}>
           <Button title='Places libres'
           color="#000"
           onPress={() => this.getPlaces(this, this.setDebug)}/>
         </View>
-        <Text>{ this.state.debug }</Text>
+        <Text>{ debug }</Text>
 
       </View>
     )

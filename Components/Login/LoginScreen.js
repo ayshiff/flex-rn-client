@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, TextInput, Button, Text } from 'react-native';
 import { AsyncStorage } from 'react-native';
+import styles from './LoginScreenStyles';
 
 class LoginScreen extends React.Component {
   static navigationOptions = {
@@ -38,45 +39,24 @@ class LoginScreen extends React.Component {
 
   render() {
     return (
-      <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-        <View style={{
-          width:250,
-          marginBottom:50,
-        }}>
-          <TextInput style={{
-            borderRadius: 4,
-            borderWidth: 0.5,
-            margin:5,
-          }}
+      <View style={styles.view}>
+        <View style={styles.view_second}>
+          <TextInput style={styles.textInput}
            placeholder="Nom"
-           onChangeText={(text) => this.setState({name:text})}
+           onChangeText={(text) => this.setState({name: text})}
           />
 
-          <TextInput style={{
-            borderRadius: 4,
-            borderWidth: 0.5,
-            margin:5,
-          }}
+          <TextInput style={styles.textInput}
             placeholder="Prénom"
-            onChangeText={(text) => this.setState({fname:text})}
+            onChangeText={(text) => this.setState({fname: text})}
           />
 
-          <TextInput style={{
-            borderRadius: 4,
-            borderWidth: 0.5,
-            margin:5,
-          }}
+          <TextInput style={styles.textInput}
             placeholder="ID"
-            onChangeText={(text) => this.setState({id:text})}
+            onChangeText={(text) => this.setState({id: text})}
           />
-          <View style={{
-            marginTop:10,
-          }}>
-            <Button title='Login'
+          <View style={styles.button_container}>
+            <Button style={styles.button_login} title='Login'
             color="#000"
             onPress={() => this._logIn()}/>
           </View>

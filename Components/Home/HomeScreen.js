@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, View, Text, Button } from 'react-native';
 import { AsyncStorage } from 'react-native';
+import styles from './HomeScreenStyles';
 
 class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -15,7 +16,7 @@ class HomeScreen extends React.Component {
         navigate('Login');
       else
       {
-        var jsonres = JSON.parse(result);
+        let jsonres = JSON.parse(result);
         if(jsonres.place == null || jsonres.place == '')
           navigate('Profile');
         else
@@ -25,16 +26,11 @@ class HomeScreen extends React.Component {
   }
 
   render() {
-    const navigate = this.props.navigation.navigate;
 
     return (
-      <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-
+      <View style={styles.view}>
         <Button
+          style={styles.button}
           title='Main Page'
           color="#000"
           onPress={() => this.componentDidMount()}/>
