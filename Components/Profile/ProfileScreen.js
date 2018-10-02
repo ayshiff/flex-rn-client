@@ -1,33 +1,47 @@
-import React from 'react'
+// @flow
+import React from "react";
+import {
+  Button,
+  Card,
+  FormInput,
+  Text,
+  List,
+  ListItem,
+  SearchBar
+} from "react-native-elements";
 
-import { View, Text, Button, TextInput } from 'react-native'
-import { AsyncStorage } from 'react-native';
-import config from '../../config/api';
-import server from '../../config/server';
-import styles from './ProfileScreenStyles';
-import {  } from 'ramda';
+import { View, TextInput, AsyncStorage, ScrollView } from "react-native";
+import config from "../../config/api";
+import server from "../../config/server";
+import styles from "./ProfileScreenStyles";
 
+type State = {
+  name: ?string,
+  fname: ?string,
+  id: ?string,
+  place: ?string,
+  debug: ?array
+};
 
-class ProfileScreen extends React.Component {
+class ProfileScreen extends React.Component<State> {
   static navigationOptions = {
-    title: 'Profile',
-  };
+    title: "Profile",
+    };
 
-  constructor(){
+  constructor() {
     super();
     this.state = {
-      name: '',
-      fname: '',
-      id:'',
-      place:'',
-      debug:'',
-    }
+      name: null,
+      fname: null,
+      id: null,
+      place: null,
+      debug: null,
+    };
   }
 
-  componentDidMount(){
-    AsyncStorage.getItem('USER', (err, result) => {
-      if(err || result == null)
-        this.goTo('Login');
+  componentDidMount() {
+    AsyncStorage.getItem("USER", (err, result) => {
+      if (err || result === null) this.goTo("Login");
       else {
         this.setState(JSON.parse(result));
       }
@@ -35,18 +49,23 @@ class ProfileScreen extends React.Component {
   }
 
   sendToServ(ctx, json) {
-    if(ctx.state.name != '' && ctx.state.fname != '' && ctx.state.id != '' && ctx.state.place != '')
-    {
+
+    if (
+      ctx.state.name !== null &&
+      ctx.state.fname !== null &&
+      ctx.state.id !== null &&
+      ctx.state.place !== null
+    ) {
       ctx = ctx || window;
 
       let payload = {
-          name: ctx.state.name,
-          fname: ctx.state.fname,
-          id_user: ctx.state.id,
-          id_place: ctx.state.place
+        name: ctx.state.name,
+        fname: ctx.state.fname,
+        id_user: ctx.state.id,
+        id_place: ctx.state.place
       };
 
-      fetch(server.address , {
+      fetch(server.address, {
         method: "POST",
         body: JSON.stringify(payload),
         headers: {
@@ -54,25 +73,25 @@ class ProfileScreen extends React.Component {
           "x-access-token": config.token
         }
       })
-      .then(res => res.json())
-      .then(data => {
-        var redirect = true;
-        json.forEach(element => {
-          if(payload.id_place == element.id && element.using)
-            redirect = false;
-        });
-        if(redirect)
-        {
-          ctx.state.debug = 'Welcome';
-          AsyncStorage.setItem('USER', JSON.stringify(ctx.state));
+        .then(res => res.json())
+        .then(data => {
+          var redirect = true;
+          json.map(
+            element =>
+              payload.id_place == element.id && element.using
+                ? (redirect = false)
+                : null
+          );
+          if (redirect) {
+            AsyncStorage.setItem("USER", JSON.stringify(ctx.state));
 
-          ctx.goTo('Leave');
-        }
-      })
+            ctx.goTo("Leave");
+          }
+        });
     }
   }
 
-  getPlaces(ctx, fn) {
+  getPlaces(ctx, fn, l = null) {
     ctx = ctx || window;
 
     fetch(server.address + "places/", {
@@ -82,18 +101,22 @@ class ProfileScreen extends React.Component {
         "x-access-token": config.token
       }
     })
-    .then(res => res.json())//transform data to json
-    .then(data =>
-    {
-      fn(ctx, data);
-    });
+      .then(res => res.json()) //transform data to json
+      .then(data => {
+          if (l) {
+          fn(ctx, l);
+          } else {
+          fn(ctx, data);
+          }
+      });
   }
 
   async setDebug(ctx, json) {
-    const result = json
-    .map(element => !element.using ? element.id : null)
-    .reduce((Accumulator, currentValue) => currentValue !== null ? Accumulator + ',' + currentValue : null)
-    ctx.setState({debug:result});
+    const result = json.filter(
+      element => element !== null && element.using === false
+    );
+    console.log(result)
+    ctx.setState({ debug: result });
   }
 
   goTo(str) {
@@ -102,70 +125,85 @@ class ProfileScreen extends React.Component {
     navigation.navigate(str);
   }
 
-  _logOut() {
-    AsyncStorage.removeItem('USER');
-    this.goTo('Login');
+  logOut() {
+    AsyncStorage.removeItem("USER");
+    this.goTo("Login");
+  }
+
+  getUser (ctx, l) {
+      ctx = ctx || window;
+      console.log(l)
+      let payload = {
+        name: ctx.state.name,
+        fname: ctx.state.fname,
+        id_user: ctx.state.id,
+        id_place: l._id
+      };
+
+      fetch(server.address, {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": config.token
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          let redirect = true;
+          payload.id_place == l.id && l.using ? (redirect = false) : null;
+          if (redirect) {
+            AsyncStorage.setItem("USER", JSON.stringify(ctx.state));
+
+            ctx.goTo("Leave");
+          }
+        });
   }
 
   render() {
     const navigation = this.props.navigation;
-    const { fname, name, id, debug } = this.state;
+    const { fname, name, id, debug } = this.state;
 
-    return (
-      <View style={styles.view}>
-
+    return <ScrollView style={styles.view}>
         <View style={styles.view_second}>
-          <Text style={styles.text_first}>{fname} {name} [{id}]</Text>
-
-          <Button
-          style={styles.logOut}
-          title='Log Out'
-          color="#000"
-          onPress={() => this._logOut()}/>
+          <Text h4 style={styles.text_first}>
+            {fname} {name} [{id}]
+          </Text>
+          <Button fontWeight="bold" fontSize={12} borderRadius={15} backgroundColor="#5167A4" color="#fff" style={styles.logOut} title="Log Out" onPress={() => this.logOut()} />
         </View>
 
-        <View style={styles.view_third}/>
+        <Card title="Manual insertion">
+          <FormInput style={styles.place} placeholder="Place" onChangeText={text => this.setState(
+                { place: text }
+              )} />
 
-        <Text style={styles.manualInsertion}>Insertion manuelle</Text>
+          <View style={styles.sendContainer}>
+            <Button fontWeight="bold" borderRadius={15} backgroundColor="#5167A4" color="#fff" style={styles.send} title="Send" onPress={() => this.getPlaces(this, this.sendToServ)} />
+          </View>
+        </Card>
 
-        <View style={styles.place}>
-          <TextInput
-            placeholder="Place"
-            onChangeText={(text) => this.setState({place:text})}
-          />
-        </View>
+        <Card title="Scan QR code">
+          <View style={styles.scan_container}>
+            <Button fontWeight="bold" borderRadius={15} backgroundColor="#5167A4" color="#fff" style={styles.scan} title="Scan" onPress={() => navigation.navigate("Scan")} />
+          </View>
+        </Card>
 
-        <View style={styles.sendContainer}>
-          <Button
-          style={styles.send}
-          title='Send'
-          color="#000"
-          onPress={() => this.getPlaces(this, this.sendToServ)}/>
-        </View>
-
-        <View style={styles.view_fourth}/>
-
-        <Text style={styles.scanQRCode}>Scan QR code</Text>
-
-        <View style={styles.scan_container}>
-          <Button
-          style={styles.scan}
-          title='Scan'
-          color="#000"
-          onPress={() => navigation.navigate('Scan') }/>
-        </View>
-
-        <View style={styles.view_fifth}/>
-
-        <View style={styles.emptyPlaces_container}>
-          <Button title='Places libres'
-          color="#000"
-          onPress={() => this.getPlaces(this, this.setDebug)}/>
-        </View>
-        <Text>{ debug }</Text>
-
-      </View>
-    )
+        <Card>
+          <View style={styles.emptyPlaces_container}>
+            <Button fontWeight="bold" large={false} borderRadius={15} backgroundColor="#5167A4" color="#fff" style={styles.free_places} title="Free places" onPress={() => this.getPlaces(this, this.setDebug)} />
+          </View>
+          {console.log(debug)}
+          {debug ? <List containerStyle={{ marginBottom: 20 }}>
+              {debug.map(l => l ? (
+                <ListItem
+                  onPress={() => this.getPlaces(this, this.getUser, l)}
+                  key={l.id}
+                  title={l.id}
+                />
+              ): null )}
+            </List> : null}
+        </Card>
+      </ScrollView>;
   }
 }
 

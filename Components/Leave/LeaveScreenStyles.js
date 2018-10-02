@@ -1,8 +1,8 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native'
 
 export default StyleSheet.create({
-    view: {
-        justifyContent:'center', 
-        alignItems:'center'
-    },
-});
+  view: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+})
