@@ -20,11 +20,11 @@ class LeaveScreen extends React.Component {
   constructor() {
     super()
     this.state = {
-      name: null,
-      fname: null,
-      id: null,
-      place: null,
-      debug: [],
+      name: '',
+      fname: '',
+      id: '',
+      place: '',
+      debug: '',
     }
   }
 
@@ -55,8 +55,7 @@ class LeaveScreen extends React.Component {
     })
       .then((data) => {
         console.log(data, ctx.data)
-        ctx.state.debug = null;
-        ctx.state.place = null;
+        ctx.state.debug = '';
         AsyncStorage.setItem('USER', JSON.stringify(ctx.state))
         ctx.goTo('Profile')
       })
