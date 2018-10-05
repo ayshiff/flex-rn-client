@@ -35,6 +35,7 @@ class LoginScreen extends React.Component {
     AsyncStorage.removeItem("USER");
   }
 
+  /** This function handle the user login */
   logIn() {
     const { navigation } = this.props;
     if (

@@ -48,6 +48,8 @@ class ProfileScreen extends React.Component<State> {
     });
   }
 
+  /** This function is used to send a new place to the server */
+
   sendToServ(ctx, json) {
     if (
       ctx.state.name !== "" &&
@@ -90,6 +92,7 @@ class ProfileScreen extends React.Component<State> {
     }
   }
 
+  /** This function is used to get the places from the server */
   getPlaces(ctx, fn, l = null) {
     ctx = ctx || window;
 
@@ -100,7 +103,7 @@ class ProfileScreen extends React.Component<State> {
         "x-access-token": config.token
       }
     })
-      .then(res => res.json()) //transform data to json
+      .then(res => res.json()) // transform data to json
       .then(data => {
         if (l) {
           fn(ctx, l);
@@ -129,6 +132,7 @@ class ProfileScreen extends React.Component<State> {
     this.goTo("Login");
   }
 
+  /** This function is used to attach the current user to a place  */
   getUser(ctx, l) {
     if (
       ctx.state.name !== "" &&
@@ -168,7 +172,6 @@ class ProfileScreen extends React.Component<State> {
               })
             );
 
-            console.log("getUser", payload, ctx.state, data);
             ctx.goTo("Leave");
           }
         });
