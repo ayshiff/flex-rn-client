@@ -4,7 +4,17 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint Components",
+    "pretty": "prettier --semi false --print-width 100 --single-quote--trailing-comma all --write \"Components/**/*.js\"",
+    "flow": "flow",
+    "lint:fix": "eslint Components/ --fix"
+  },
+  "lint-staged": {
+    "*.js": [
+      "npm pretty",
+      "git add"
+    ]
   },
   "dependencies": {
     "@tradle/react-native-http": "^2.0.1",
@@ -20,16 +30,19 @@
     "process": "^0.11.10",
     "punycode": "^1.4.1",
     "querystring-es3": "^0.2.1",
+    "ramda": "^0.25.0",
     "react": "16.4.1",
     "react-native": "0.56.0",
     "react-native-camera": "^1.2.0",
     "react-native-crypto": "^2.1.2",
+    "react-native-elements": "^0.19.1",
     "react-native-level-fs": "^3.0.1",
     "react-native-os": "^1.2.1",
     "react-native-qrcode-scanner": "^1.0.1",
     "react-native-randombytes": "^3.5.0",
     "react-native-tcp": "^3.3.0",
     "react-native-udp": "^2.3.1",
+    "react-native-vector-icons": "^5.0.0",
     "react-navigation": "^2.12.1",
     "readable-stream": "^1.0.33",
     "stream-browserify": "^1.0.0",
@@ -41,9 +54,20 @@
     "vm-browserify": "0.0.4"
   },
   "devDependencies": {
+    "babel-eslint": "^10.0.1",
     "babel-jest": "23.4.2",
     "babel-preset-react-native": "5.0.2",
+    "eslint": "^5.6.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-flowtype": "^2.50.3",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.11.1",
+    "flow-bin": "^0.81.0",
+    "husky": "^1.0.1",
     "jest": "23.5.0",
+    "lint-staged": "^7.3.0",
+    "prettier": "^1.14.3",
     "react-test-renderer": "16.4.1",
     "rn-nodeify": "github:tradle/rn-nodeify"
   },

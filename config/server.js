@@ -1,3 +1,3 @@
 module.exports = {
-  'address': ''
+  'address': 'http://localhost:3000/ping/'
 };
