@@ -14,6 +14,8 @@ import { View, TextInput, AsyncStorage, ScrollView } from "react-native";
 import config from "../../config/api";
 import server from "../../config/server";
 import styles from "./ProfileScreenStyles";
+import { NavigationScreenProp } from 'react-navigation'
+import { filter } from 'ramda';
 
 type State = {
   name: ?string,
@@ -23,7 +25,11 @@ type State = {
   debug: ?array
 };
 
-class ProfileScreen extends React.Component<State> {
+type Props = {
+  navigate: NavigationScreenProp<{}>,
+};
+
+class ProfileScreen extends React.Component<Props, State> {
   static navigationOptions = {
     title: "Profile"
   };
@@ -35,7 +41,8 @@ class ProfileScreen extends React.Component<State> {
       fname: "",
       id: "",
       place: "",
-      debug: ""
+      debug: "",
+      search: "",
     };
   }
 
@@ -131,6 +138,28 @@ class ProfileScreen extends React.Component<State> {
     AsyncStorage.removeItem("USER");
     this.goTo("Login");
   }
+
+  _handleSearch = search => {
+    this.setState({ search });
+  };
+
+  _handleList = () => {
+    const { debug, search } = this.state;
+
+    const newT =
+      debug !== ""
+        ? debug.filter(e => {
+            let finalResult = true;
+            for (let element in search) {
+              if (search[element] !== e.id[element]) {
+                finalResult = false;
+              }
+            }
+            return finalResult;
+          })
+        : debug;
+    return search === "" ? debug : newT;
+  };
 
   /** This function is used to attach the current user to a place  */
   getUser(ctx, l) {
@@ -233,7 +262,6 @@ class ProfileScreen extends React.Component<State> {
             />
           </View>
         </Card>
-
         <Card>
           <View style={styles.emptyPlaces_container}>
             <Button
@@ -247,16 +275,28 @@ class ProfileScreen extends React.Component<State> {
               onPress={() => this.getPlaces(this, this.setDebug)}
             />
           </View>
-          {console.log(debug)}
+          <SearchBar
+            onChangeText={this._handleSearch}
+            round
+            lightTheme
+            platform="ios"
+            containerStyle={{
+              backgroundColor: "white",
+              borderWidth: 0,
+              marginTop: 10
+            }}
+            searchIcon={{ size: 24 }}
+            placeholder="Search a place..."
+          />
           {debug !== "" && debug ? (
             <List containerStyle={{ marginBottom: 20 }}>
-              {debug.map(
-                l =>
-                  l ? (
+              {this._handleList().map(
+                item =>
+                  item ? (
                     <ListItem
-                      onPress={() => this.getPlaces(this, this.getUser, l)}
-                      key={l.id}
-                      title={l.id}
+                      onPress={() => this.getPlaces(this, this.getUser, item)}
+                      key={item.id}
+                      title={item.id}
                     />
                   ) : null
               )}
