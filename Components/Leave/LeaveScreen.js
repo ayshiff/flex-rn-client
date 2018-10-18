@@ -40,14 +40,15 @@ class LeaveScreen extends React.Component<Props, State> {
   }
 
   leavePlace(ctx) {
+    const { name, fname, id, place, historical } = ctx.state;
     ctx = ctx || window;
 
     const payload = {
-      name: ctx.state.name,
-      fname: ctx.state.fname,
-      id_user: ctx.state.id,
-      id_place: ctx.state.place,
-      historical: ctx.state.historical
+      name: name,
+      fname: fname,
+      id_user: id,
+      id_place: place,
+      historical: historical
     };
     fetch(server.address, {
       method: "POST",

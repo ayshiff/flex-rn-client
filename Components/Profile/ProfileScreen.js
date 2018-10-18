@@ -139,7 +139,7 @@ class ProfileScreen extends React.Component<Props, State> {
       });
   }
 
-  async setDebug(ctx, json) {
+  async setPlaces(ctx, json) {
     const result = json.filter(
       element => element !== null && element.using === false
     );
@@ -293,7 +293,7 @@ class ProfileScreen extends React.Component<Props, State> {
               color="#fff"
               style={styles.free_places}
               title="Free places"
-              onPress={() => this.getPlaces(this, this.setDebug)}
+              onPress={() => this.getPlaces(this, this.setPlaces)}
             />
           </View>
           <SearchBar

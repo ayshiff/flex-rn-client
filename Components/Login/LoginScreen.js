@@ -14,8 +14,9 @@ import styles from "./LoginScreenStyles";
 import server from "../../config/server";
 import config from "../../config/api";
 import { omit } from 'ramda';
+import type { State, Props } from './LoginScreenType';
 
-class LoginScreen extends React.Component {
+class LoginScreen extends React.Component<Props, State> {
   static navigationOptions = {
     title: "Login"
   };
@@ -63,7 +64,7 @@ class LoginScreen extends React.Component {
       })
         .then(res => res.json())
         .then(data => {
-          let redirect = true;
+          let redirect: boolean = true;
 
           if (redirect) {
             AsyncStorage.setItem("USER", JSON.stringify(omit('debug', this.state)));
