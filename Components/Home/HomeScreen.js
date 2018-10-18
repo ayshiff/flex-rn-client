@@ -1,10 +1,17 @@
+// @flow
+
 import React from 'react'
 import {
   View, Button, AsyncStorage
 } from 'react-native'
 import styles from './HomeScreenStyles'
+import { NavigationScreenProp } from 'react-navigation'
 
-class HomeScreen extends React.Component {
+type Props = {
+  navigation: NavigationScreenProp<{}>,
+};
+
+class HomeScreen extends React.Component<Props> {
   static navigationOptions = {
     title: 'Home',
   }

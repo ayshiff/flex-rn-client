@@ -27,7 +27,8 @@ class LoginScreen extends React.Component {
       fname: "",
       id: "",
       place: "",
-      debug: ""
+      debug: "",
+      historical: "",
     };
   }
 
@@ -47,7 +48,8 @@ class LoginScreen extends React.Component {
         name: this.state.name,
         fname: this.state.fname,
         id_user: this.state.id,
-        id_place: ''
+        id_place: '',
+        historical: this.state.historical,
       };
 
       AsyncStorage.setItem("USER", JSON.stringify(this.state));
@@ -65,7 +67,7 @@ class LoginScreen extends React.Component {
 
           if (redirect) {
             AsyncStorage.setItem("USER", JSON.stringify(omit('debug', this.state)));
-
+            console.log("REDIRECT Profile")
             navigation.goBack();
             navigation.navigate("Profile");
           }

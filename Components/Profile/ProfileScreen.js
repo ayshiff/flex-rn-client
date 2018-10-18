@@ -15,18 +15,20 @@ import config from "../../config/api";
 import server from "../../config/server";
 import styles from "./ProfileScreenStyles";
 import { NavigationScreenProp } from 'react-navigation'
-import { filter } from 'ramda';
+import { filter, find, propEq } from 'ramda';
 
 type State = {
-  name: ?string,
-  fname: ?string,
-  id: ?string,
-  place: ?string,
-  debug: ?array
+  name: string,
+  fname: string,
+  id: string,
+  place: string,
+  search: string,
+  historical: Array<object> | string,
+  debug: Array<any> | string,
 };
 
 type Props = {
-  navigate: NavigationScreenProp<{}>,
+  navigation: NavigationScreenProp<{}>,
 };
 
 class ProfileScreen extends React.Component<Props, State> {
@@ -43,14 +45,28 @@ class ProfileScreen extends React.Component<Props, State> {
       place: "",
       debug: "",
       search: "",
+      historical: "",
     };
   }
 
   componentDidMount() {
+    const { id } = this.state;
     AsyncStorage.getItem("USER", (err, result) => {
       if (err || result === null) this.goTo("Login");
       else {
         this.setState(JSON.parse(result));
+        const userId = JSON.parse(result).id;
+        fetch(server.address + "users/" + userId, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "x-access-token": config.token
+          }
+        })
+          .then(res => res.json()) // transform data to json
+          .then(data => {
+            this.setState({ historical: data[0].historical });
+          });
       }
     });
   }
@@ -62,17 +78,20 @@ class ProfileScreen extends React.Component<Props, State> {
       ctx.state.name !== "" &&
       ctx.state.fname !== "" &&
       ctx.state.id !== "" &&
-      ctx.state.place !== ""
+      ctx.state.place !== "" &&
+      ctx.state.historical !== ""
     ) {
+      const { name, fname, id, place, historical } = ctx.state
       ctx = ctx || window;
 
       let payload = {
-        name: ctx.state.name,
-        fname: ctx.state.fname,
-        id_user: ctx.state.id,
-        id_place: ctx.state.place
+        name,
+        fname,
+        id_user: id,
+        id_place: place,
+        historical,
       };
-      console.log(payload);
+
       fetch(server.address, {
         method: "POST",
         body: JSON.stringify(payload),
@@ -83,7 +102,7 @@ class ProfileScreen extends React.Component<Props, State> {
       })
         .then(res => res.json())
         .then(data => {
-          var redirect = true;
+          let redirect = true;
           json.map(
             element =>
               payload.id_place == element.id && element.using
@@ -100,7 +119,7 @@ class ProfileScreen extends React.Component<Props, State> {
   }
 
   /** This function is used to get the places from the server */
-  getPlaces(ctx, fn, l = null) {
+  getPlaces(ctx, fn, element = null) {
     ctx = ctx || window;
 
     fetch(server.address + "places/", {
@@ -112,8 +131,8 @@ class ProfileScreen extends React.Component<Props, State> {
     })
       .then(res => res.json()) // transform data to json
       .then(data => {
-        if (l) {
-          fn(ctx, l);
+        if (element) {
+          fn(ctx, element);
         } else {
           fn(ctx, data);
         }
@@ -124,7 +143,6 @@ class ProfileScreen extends React.Component<Props, State> {
     const result = json.filter(
       element => element !== null && element.using === false
     );
-    console.log(result);
     ctx.setState({ debug: result });
   }
 
@@ -146,7 +164,7 @@ class ProfileScreen extends React.Component<Props, State> {
   _handleList = () => {
     const { debug, search } = this.state;
 
-    const newT =
+    const newT: string | Array<object> =
       debug !== ""
         ? debug.filter(e => {
             let finalResult = true;
@@ -162,20 +180,22 @@ class ProfileScreen extends React.Component<Props, State> {
   };
 
   /** This function is used to attach the current user to a place  */
-  getUser(ctx, l) {
+  getUser(ctx, element: object) {
     if (
       ctx.state.name !== "" &&
       ctx.state.fname !== "" &&
       ctx.state.id !== "" &&
-      l.id !== ""
+      element.id !== ""
     ) {
+      const { name, fname, id, historical } = ctx.state;
       ctx = ctx || window;
 
       let payload = {
-        name: ctx.state.name,
-        fname: ctx.state.fname,
-        id_user: ctx.state.id,
-        id_place: l.id
+        name: name,
+        fname: fname,
+        id_user: id,
+        id_place: element.id,
+        historical: historical
       };
       fetch(server.address, {
         method: "POST",
@@ -187,8 +207,8 @@ class ProfileScreen extends React.Component<Props, State> {
       })
         .then(res => res.json())
         .then(data => {
-          let redirect = true;
-          payload.id_place == l.id && l.using ? (redirect = false) : null;
+          let redirect: boolean = true;
+          payload.id_place == element.id && element.using ? (redirect = false) : null;
           if (redirect) {
             AsyncStorage.setItem(
               "USER",
@@ -197,7 +217,8 @@ class ProfileScreen extends React.Component<Props, State> {
                 fname: payload.fname,
                 id: payload.id_user,
                 place: payload.id_place,
-                debug: ctx.state.debug
+                debug: ctx.state.debug,
+                historical: ctx.state.historical
               })
             );
 

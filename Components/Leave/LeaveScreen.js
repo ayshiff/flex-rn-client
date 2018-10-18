@@ -1,3 +1,4 @@
+// @flow
 import React from 'react'
 
 import { View } from 'react-native'
@@ -5,6 +6,7 @@ import { AsyncStorage } from 'react-native'
 import config from '../../config/api'
 import server from '../../config/server'
 import styles from './LeaveScreenStyles'
+import type { State, Props } from './LeaveScreenType';
 
 import {
   Button,
@@ -12,68 +14,85 @@ import {
   Text,
 } from "react-native-elements";
 
-class LeaveScreen extends React.Component {
+type Payload = {
+  name: string,
+  fname: string,
+  id_user: string,
+  id_place: string,
+  historical: string | Array<object>
+}
+
+class LeaveScreen extends React.Component<Props, State> {
   static navigationOptions = {
-    title: 'Leave',
-  }
+    title: "Leave"
+  };
 
   constructor() {
-    super()
+    super();
     this.state = {
-      name: '',
-      fname: '',
-      id: '',
-      place: '',
-      debug: '',
-    }
+      name: "",
+      fname: "",
+      id: "",
+      place: "",
+      debug: "",
+      historical: ""
+    };
   }
 
   leavePlace(ctx) {
-    ctx = ctx || window
+    ctx = ctx || window;
 
     const payload = {
       name: ctx.state.name,
       fname: ctx.state.fname,
       id_user: ctx.state.id,
       id_place: ctx.state.place,
-    }
-    console.log(payload)
+      historical: ctx.state.historical
+    };
     fetch(server.address, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
       headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': config.token,
-      },
+        "Content-Type": "application/json",
+        "x-access-token": config.token
+      }
     })
-          .then(res => {
-            console.log("res", res)
-      if(res.ok)
-        return res.json();
-      else
-        ctx.setState({debug:'ERROR'});
-    })
-      .then((data) => {
-        console.log(data, ctx.data)
-        ctx.state.debug = '';
-        AsyncStorage.setItem('USER', JSON.stringify(ctx.state))
-        ctx.goTo('Profile')
+      .then(res => {
+        if (res.ok) return res.json();
+        else ctx.setState({ debug: "ERROR" });
       })
+      .then(data => {
+        ctx.state.debug = "";
+        AsyncStorage.setItem("USER", JSON.stringify(ctx.state));
+        ctx.goTo("Profile");
+      });
   }
 
   componentDidMount() {
-    AsyncStorage.getItem('USER', (err, result) => {
-      if (err || result == null) this.goTo('Login')
+    AsyncStorage.getItem("USER", (err, result) => {
+      if (err || result == null) this.goTo("Login");
       else {
-        this.setState(JSON.parse(result))
+        this.setState(JSON.parse(result));
+        const userId: string = JSON.parse(result).id;
+        fetch(server.address + "users/" + userId, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "x-access-token": config.token
+          }
+        })
+          .then(res => res.json()) // transform data to json
+          .then(data => {
+            this.setState({ historical: data[0].historical });
+          });
       }
-    })
+    });
   }
 
-  goTo(str) {
-    const navigation = this.props.navigation
-    navigation.popToTop()
-    navigation.navigate(str)
+  goTo(str: string) {
+    const navigation = this.props.navigation;
+    navigation.popToTop();
+    navigation.navigate(str);
   }
 
   render() {
@@ -82,20 +101,21 @@ class LeaveScreen extends React.Component {
       <Card style={styles.view}>
         <Text>
           {fname}
-          {name}
-[
-          {id}
+          {name}[{id}
           ]:
           {place}
         </Text>
         <Button
           style={styles.button}
-          fontWeight="bold" borderRadius={15} backgroundColor="#5167A4" color="#fff"
+          fontWeight="bold"
+          borderRadius={15}
+          backgroundColor="#5167A4"
+          color="#fff"
           title="Leave place"
           onPress={() => this.leavePlace(this)}
         />
       </Card>
-    )
+    );
   }
 }
 export default LeaveScreen
