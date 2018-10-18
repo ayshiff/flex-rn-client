@@ -1,4 +1,4 @@
-# flex-rn-client
+# flex-rn-client [![Build Status](https://app.bitrise.io/app/8ba0832124e4cdf2/status.svg?token=HTfEgn2kTcAN_FI2qXEqeQ&branch=feature/refactoring)](https://app.bitrise.io/app/8ba0832124e4cdf2)
 
 Simple mobile client in React-Native for flex-server project
 
