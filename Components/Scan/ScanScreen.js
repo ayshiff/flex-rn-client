@@ -1,20 +1,17 @@
-
-
-import React, { Component } from 'react'
-import { AsyncStorage } from 'react-native'
+import React, { Component } from 'react';
+import { AsyncStorage } from 'react-native';
 import {
-  AppRegistry, Text, TouchableOpacity, Linking,
-} from 'react-native'
-import QRCodeScanner from 'react-native-qrcode-scanner'
-import config from '../../config/api'
-import server from '../../config/server'
-import styles from './ScanScreenStyles'
-
+ AppRegistry, Text, TouchableOpacity, Linking 
+} from 'react-native';
+import QRCodeScanner from 'react-native-qrcode-scanner';
+import config from '../../config/api';
+import server from '../../config/server';
+import styles from './ScanScreenStyles';
 
 class ScanScreen extends Component {
   static navigationOptions = {
-    title: 'Scan',
-  }
+    title: 'Scan'
+  };
 
   constructor() {
     super()
@@ -23,13 +20,13 @@ class ScanScreen extends Component {
       fname: '',
       id: '',
       place: '',
-      debug: '',
+      debug: ''
     }
   }
 
   componentDidMount() {
     AsyncStorage.getItem('USER', (err, result) => {
-      if (err || result == null) this.goTo('Login')
+      if (err || result == null) this.goTo('Login');
       else {
         this.setState(JSON.parse(result))
       }
@@ -39,14 +36,14 @@ class ScanScreen extends Component {
   onSuccess = (e) => {
     this.setState({ place: e.data })
     this.getPlaces(this, this.sendToServ)
-  }
+  };
 
   sendToServ(ctx, json) {
     if (
-      ctx.state.name !== ''
-      && ctx.state.fname !== ''
-      && ctx.state.id !== ''
-      && ctx.state.place !== ''
+      ctx.state.name !== '' &&
+      ctx.state.fname !== '' &&
+      ctx.state.id !== '' &&
+      ctx.state.place !== ''
     ) {
       const ctx = ctx || window
 
@@ -71,11 +68,11 @@ class ScanScreen extends Component {
           // let redirectRefacto = json.map(element => payload.id_place == element.id && element.using ? redirect = false : true )
           json.forEach((element) => {
             if (payload.id_place == element.id && element.using) redirect = false
-          })
+          });
           if (redirect) {
             AsyncStorage.setItem('USER', JSON.stringify(ctx.state))
 
-            ctx.goTo('Leave')
+            ctx.goTo('Leave');
           }
         })
     }
@@ -94,7 +91,7 @@ class ScanScreen extends Component {
       .then(res => res.json()) // transform data to json
       .then((data) => {
         fn(ctx, data)
-      })
+      });
   }
 
   goTo(str) {

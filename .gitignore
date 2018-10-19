@@ -43,6 +43,7 @@ project.xcworkspace
 local.properties
 
 # node.js
+cache/
 node_modules/
 npm-debug.log
 

@@ -1,5 +1,5 @@
 // @flow
-import React from "react";
+import React from 'react';
 import {
   Button,
   Card,
@@ -7,180 +7,239 @@ import {
   Text,
   List,
   ListItem,
-  SearchBar
-} from "react-native-elements";
+  SearchBar,
+} from 'react-native-elements';
 
-import { View, TextInput, AsyncStorage, ScrollView } from "react-native";
-import config from "../../config/api";
-import server from "../../config/server";
-import styles from "./ProfileScreenStyles";
+import {
+ View, TextInput, AsyncStorage, ScrollView 
+} from 'react-native';
+import { NavigationScreenProp } from 'react-navigation';
+import { filter, find, propEq } from 'ramda';
+import config from '../../config/api';
+import server from '../../config/server';
+import styles from './ProfileScreenStyles';
 
 type State = {
-  name: ?string,
-  fname: ?string,
-  id: ?string,
-  place: ?string,
-  debug: ?array
+  name: string,
+  fname: string,
+  id: string,
+  place: string,
+  search: string,
+  historical: Array<object> | string,
+  debug: Array<any> | string
 };
 
-class ProfileScreen extends React.Component<State> {
+type Props = {
+  navigation: NavigationScreenProp<{}>
+};
+
+class ProfileScreen extends React.Component<Props, State> {
   static navigationOptions = {
-    title: "Profile"
+    title: 'Profile'
   };
 
   constructor() {
-    super();
+    super()
     this.state = {
-      name: "",
-      fname: "",
-      id: "",
-      place: "",
-      debug: ""
-    };
+      name: '',
+      fname: '',
+      id: '',
+      place: '',
+      debug: '',
+      search: '',
+      historical: ''
+    }
   }
 
   componentDidMount() {
-    AsyncStorage.getItem("USER", (err, result) => {
-      if (err || result === null) this.goTo("Login");
+    const { id } = this.state
+    AsyncStorage.getItem('USER', (err, result) => {
+      if (err || result === null) this.goTo('Login');
       else {
-        this.setState(JSON.parse(result));
+        this.setState(JSON.parse(result))
+        const userId = JSON.parse(result).id
+        fetch(`${server.address}users/${userId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'x-access-token': config.token,
+          },
+        })
+          .then(res => res.json()) // transform data to json
+          .then((data) => {
+            this.setState({ historical: data[0].historical })
+          });
       }
-    });
+    })
   }
 
   /** This function is used to send a new place to the server */
 
   sendToServ(ctx, json) {
     if (
-      ctx.state.name !== "" &&
-      ctx.state.fname !== "" &&
-      ctx.state.id !== "" &&
-      ctx.state.place !== ""
+      ctx.state.name !== '' &&
+      ctx.state.fname !== '' &&
+      ctx.state.id !== '' &&
+      ctx.state.place !== '' &&
+      ctx.state.historical !== ''
     ) {
-      ctx = ctx || window;
+      const {
+ name, fname, id, place, historical 
+} = ctx.state;
+      ctx = ctx || window
 
-      let payload = {
-        name: ctx.state.name,
-        fname: ctx.state.fname,
-        id_user: ctx.state.id,
-        id_place: ctx.state.place
-      };
-      console.log(payload);
+      const payload = {
+        name,
+        fname,
+        id_user: id,
+        id_place: place,
+        historical
+      }
+
       fetch(server.address, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify(payload),
         headers: {
-          "Content-Type": "application/json",
-          "x-access-token": config.token
-        }
+          'Content-Type': 'application/json',
+          'x-access-token': config.token,
+        },
       })
         .then(res => res.json())
-        .then(data => {
-          var redirect = true;
+        .then((data) => {
+          let redirect = true
           json.map(
-            element =>
-              payload.id_place == element.id && element.using
+            element => (payload.id_place == element.id && element.using
                 ? (redirect = false)
                 : null
-          );
+          )
           if (redirect) {
-            AsyncStorage.setItem("USER", JSON.stringify(ctx.state));
+            AsyncStorage.setItem('USER', JSON.stringify(ctx.state))
 
-            ctx.goTo("Leave");
+            ctx.goTo('Leave');
           }
-        });
+        })
     }
   }
 
   /** This function is used to get the places from the server */
-  getPlaces(ctx, fn, l = null) {
-    ctx = ctx || window;
+  getPlaces(ctx, fn, element = null) {
+    ctx = ctx || window
 
-    fetch(server.address + "places/", {
-      method: "GET",
+    fetch(`${server.address}places/`, {
+      method: 'GET',
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "x-access-token": config.token
-      }
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'x-access-token': config.token,
+      },
     })
       .then(res => res.json()) // transform data to json
-      .then(data => {
-        if (l) {
-          fn(ctx, l);
+      .then((data) => {
+        if (element) {
+          fn(ctx, element)
         } else {
-          fn(ctx, data);
+          fn(ctx, data)
         }
-      });
+      })
   }
 
-  async setDebug(ctx, json) {
+  async setPlaces(ctx, json) {
     const result = json.filter(
-      element => element !== null && element.using === false
-    );
-    console.log(result);
-    ctx.setState({ debug: result });
+      element => element !== null && element.using === false,
+    )
+    ctx.setState({ debug: result })
   }
 
   goTo(str) {
-    const navigation = this.props.navigation;
-    navigation.popToTop();
-    navigation.navigate(str);
+    const navigation = this.props.navigation
+    navigation.popToTop()
+    navigation.navigate(str)
   }
 
   logOut() {
-    AsyncStorage.removeItem("USER");
-    this.goTo("Login");
+    AsyncStorage.removeItem('USER');
+    this.goTo('Login');
   }
 
-  /** This function is used to attach the current user to a place  */
-  getUser(ctx, l) {
-    if (
-      ctx.state.name !== "" &&
-      ctx.state.fname !== "" &&
-      ctx.state.id !== "" &&
-      l.id !== ""
-    ) {
-      ctx = ctx || window;
+  _handleSearch = (search) => {
+    this.setState({ search })
+  };
 
-      let payload = {
-        name: ctx.state.name,
-        fname: ctx.state.fname,
-        id_user: ctx.state.id,
-        id_place: l.id
-      };
+  _handleList = () => {
+    const { debug, search } = this.state
+
+    const newT: string | Array<object> =
+      debug !== ""
+        ? debug.filter((e) => {
+            let finalResult = true;
+            for (const element in search) {
+          if (search[element] !== e.id[element]) {
+                finalResult = false;
+              }
+            }
+            return finalResult;
+          })
+        : debug
+    return search === '' ? debug : newT
+  };
+
+  /** This function is used to attach the current user to a place  */
+  getUser(ctx, element: object) {
+    if (
+      ctx.state.name !== '' &&
+      ctx.state.fname !== '' &&
+      ctx.state.id !== '' &&
+      element.id !== ''
+    ) {
+      const {
+ name, fname, id, historical 
+} = ctx.state
+      ctx = ctx || window
+
+      const payload = {
+        name,
+        fname,
+        id_user: id,
+        id_place: element.id,
+        historical
+      }
       fetch(server.address, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify(payload),
         headers: {
-          "Content-Type": "application/json",
-          "x-access-token": config.token
-        }
+          'Content-Type': 'application/json',
+          'x-access-token': config.token,
+        },
       })
         .then(res => res.json())
-        .then(data => {
-          let redirect = true;
-          payload.id_place == l.id && l.using ? (redirect = false) : null;
+        .then((data) => {
+          let redirect: boolean = true
+          payload.id_place == element.id && element.using
+            ? (redirect = false)
+            : null
           if (redirect) {
             AsyncStorage.setItem(
-              "USER",
+              'USER',
               JSON.stringify({
                 name: payload.name,
                 fname: payload.fname,
                 id: payload.id_user,
                 place: payload.id_place,
-                debug: ctx.state.debug
-              })
-            );
+                debug: ctx.state.debug,
+                historical: ctx.state.historical,
+              }),
+            )
 
-            ctx.goTo("Leave");
+            ctx.goTo('Leave');
           }
-        });
+        })
     }
   }
 
   render() {
-    const navigation = this.props.navigation;
-    const { fname, name, id, debug } = this.state;
+    const navigation = this.props.navigation
+    const {
+ fname, name, id, debug 
+} = this.state
 
     return (
       <ScrollView style={styles.view}>
@@ -229,11 +288,10 @@ class ProfileScreen extends React.Component<State> {
               color="#fff"
               style={styles.scan}
               title="Scan"
-              onPress={() => navigation.navigate("Scan")}
+              onPress={() => navigation.navigate('Scan')}
             />
           </View>
         </Card>
-
         <Card>
           <View style={styles.emptyPlaces_container}>
             <Button
@@ -244,19 +302,30 @@ class ProfileScreen extends React.Component<State> {
               color="#fff"
               style={styles.free_places}
               title="Free places"
-              onPress={() => this.getPlaces(this, this.setDebug)}
+              onPress={() => this.getPlaces(this, this.setPlaces)}
             />
           </View>
-          {console.log(debug)}
-          {debug !== "" && debug ? (
+          <SearchBar
+            onChangeText={this._handleSearch}
+            round
+            lightTheme
+            platform="ios"
+            containerStyle={{
+              backgroundColor: 'white',
+              borderWidth: 0,
+              marginTop: 10,
+            }}
+            searchIcon={{ size: 24 }}
+            placeholder="Search a place..."
+          />
+          {debug !== '' && debug ? (
             <List containerStyle={{ marginBottom: 20 }}>
-              {debug.map(
-                l =>
-                  l ? (
+              {this._handleList().map(
+                item => (item ? (
                     <ListItem
-                      onPress={() => this.getPlaces(this, this.getUser, l)}
-                      key={l.id}
-                      title={l.id}
+                      onPress={() => this.getPlaces(this, this.getUser, item)}
+                      key={item.id}
+                      title={item.id}
                     />
                   ) : null
               )}
@@ -264,8 +333,8 @@ class ProfileScreen extends React.Component<State> {
           ) : null}
         </Card>
       </ScrollView>
-    );
+    )
   }
 }
 
-export default ProfileScreen;
+export default ProfileScreen
