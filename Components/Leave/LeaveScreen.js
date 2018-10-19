@@ -1,18 +1,13 @@
 // @flow
-import React from 'react'
+import React from 'react';
 
-import { View } from 'react-native'
-import { AsyncStorage } from 'react-native'
-import config from '../../config/api'
-import server from '../../config/server'
-import styles from './LeaveScreenStyles'
-import type { State, Props } from './LeaveScreenType';
-
-import {
-  Button,
-  Card,
-  Text,
-} from "react-native-elements";
+import { View } from 'react-native';
+import { AsyncStorage } from 'react-native';
+import { Button, Card, Text } from 'react-native-elements';
+import config from "../../config/api";
+import server from "../../config/server";
+import styles from "./LeaveScreenStyles";
+import type { State, Props } from "./LeaveScreenType";
 
 type Payload = {
   name: string,
@@ -20,7 +15,7 @@ type Payload = {
   id_user: string,
   id_place: string,
   historical: string | Array<object>
-}
+};
 
 class LeaveScreen extends React.Component<Props, State> {
   static navigationOptions = {
@@ -44,11 +39,11 @@ class LeaveScreen extends React.Component<Props, State> {
     ctx = ctx || window;
 
     const payload = {
-      name: name,
-      fname: fname,
+      name,
+      fname,
       id_user: id,
       id_place: place,
-      historical: historical
+      historical,
     };
     fetch(server.address, {
       method: "POST",
@@ -75,7 +70,7 @@ class LeaveScreen extends React.Component<Props, State> {
       else {
         this.setState(JSON.parse(result));
         const userId: string = JSON.parse(result).id;
-        fetch(server.address + "users/" + userId, {
+        fetch(`${server.address}users/${userId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -85,7 +80,7 @@ class LeaveScreen extends React.Component<Props, State> {
           .then(res => res.json()) // transform data to json
           .then(data => {
             this.setState({ historical: data[0].historical });
-          });
+          })
       }
     });
   }
@@ -102,7 +97,8 @@ class LeaveScreen extends React.Component<Props, State> {
       <Card style={styles.view}>
         <Text>
           {fname}
-          {name}[{id}
+          {name}[
+{id}
           ]:
           {place}
         </Text>

@@ -1,5 +1,5 @@
 // @flow
-import { NavigationScreenProp } from 'react-navigation'
+import { NavigationScreenProp } from 'react-navigation';
 
 export type State = {
   name: string,
@@ -7,9 +7,9 @@ export type State = {
   id: string,
   place: string,
   historical: Array<object> | string,
-  debug: Array<any> | string,
+  debug: Array<any> | string
 };
 
 export type Props = {
-  navigation: NavigationScreenProp<{}>,
+  navigation: NavigationScreenProp<{}>
 };

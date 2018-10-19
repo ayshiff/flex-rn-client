@@ -1,9 +1,9 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   view: {
     flex: 1,
-    flexDirection: 'column',
+    flexDirection: 'column'
   },
   view_second: {
     flexDirection: 'row',
@@ -19,8 +19,7 @@ export default StyleSheet.create({
     borderRadius: 4,
     borderWidth: 0.5,
   },
-  place: {
-  },
+  place: {},
   sendContainer: {
     marginRight: 50,
     marginLeft: 50,
@@ -39,7 +38,7 @@ export default StyleSheet.create({
     margin: 20,
     marginRight: 50,
     marginLeft: 50,
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-end'
   },
   view_fifth: {
     marginTop: 20,
@@ -51,18 +50,10 @@ export default StyleSheet.create({
     marginLeft: 50,
     marginRight: 50,
   },
-  send: {
-    
-  },
-  scan: {
-    
-  },
-  logOut: {
-
-  },
-  free_places: {
-    
-  },
+  send: {},
+  scan: {},
+  logOut: {},
+  free_places: {},
   places: {
     fontSize: 15,
   }

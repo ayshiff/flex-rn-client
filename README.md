@@ -1,6 +1,82 @@
-# flex-rn-client [![Build Status](https://app.bitrise.io/app/8ba0832124e4cdf2/status.svg?token=HTfEgn2kTcAN_FI2qXEqeQ&branch=feature/refactoring)](https://app.bitrise.io/app/8ba0832124e4cdf2)
+# **flex-rn-client** [![Build Status](https://app.bitrise.io/app/8ba0832124e4cdf2/status.svg?token=HTfEgn2kTcAN_FI2qXEqeQ&branch=feature/refactoring)](https://app.bitrise.io/app/8ba0832124e4cdf2)
 
-Simple mobile client in React-Native for flex-server project
+Simple mobile client in React-Native for **flex-server** project
+
+# Steps to follow
+
+## Installing dependencies
+
+You will need Node, Watchman, the React Native command line interface, and Xcode.
+
+While you can use any editor of your choice to develop your app, you will need to install Xcode in order to set up the necessary tooling to build your React Native app for iOS.
+
+### Node, Watchman
+
+We recommend installing Node and Watchman using Homebrew. Run the following commands in a Terminal after installing Homebrew:
+```
+brew install node
+brew install watchman
+```
+
+If you have already installed Node on your system, make sure it is Node 8.3 or newer.
+
+Watchman is a tool by Facebook for watching changes in the filesystem. It is highly recommended you install it for better performance.
+
+### The React Native CLI
+
+Node comes with npm, which lets you install the React Native command line interface.
+
+Run the following command in a Terminal:
+```npm install -g react-native-cli```
+
+### Xcode
+
+The easiest way to install Xcode is via the Mac App Store. Installing Xcode will also install the iOS Simulator and all the necessary tools to build your iOS app.
+
+If you have already installed Xcode on your system, make sure it is version 9.4 or newer.
+
+#### Command Line Tools
+
+You will also need to install the Xcode Command Line Tools. Open Xcode, then choose "Preferences..." from the Xcode menu. Go to the Locations panel and install the tools by selecting the most recent version in the Command Line Tools dropdown.
+
+## Running your React Native application
+
+Run ```react-native run-ios``` inside your React Native project folder:
+```
+cd flex-rn-client
+react-native run-ios
+```
+
+Make sure you have filled the config files with your API :
+(Follow these steps to have your server working :
+[flex-rn-server](https://github.com/ayshiff/flex-server)) 
+
+For `api.js`:
+
+```
+module.exports = {
+  'email': '',
+  'password': '',
+  'token': '',
+  '_id': ''
+};
+```
+
+And for `server.js`:
+
+```
+module.exports = {
+  'address': ''
+};
+```
+
+
+## Generating Signed APK
+
+For Android deployment: 
+
+See the **[current doc](https://facebook.github.io/react-native/docs/signed-apk-android)**
+
 
 # Project Structure
 
@@ -46,12 +122,18 @@ Simple mobile client in React-Native for flex-server project
 - flow: "flow",
 - lint:fix: "eslint Components/ --fix"
 
+The project uses [FLow](https://flow.org/) for type checking. Feel free to increase the type checking coverage by adding some tests 👍.
+
+The project also use [ESlint](https://eslint.org/) and [Prettier](https://prettier.io/). You can see lint warnings / errors by running    
+`npm run lint`.
+
+
 # Current State
 
-| Screens components | State                                                                | Props      | API routes         | Flow support |
+| Screen components | State                                                                | Props      | API routes         | Flow support |
 | ------------------ | -------------------------------------------------------------------- | ---------- | ------------------ | ------------ |
-| Home               |                                                                      | navigation |                    | []           |
-| Login              | `name:string ,fname:string, id: string, place: string, debug: array` | navigation | /login_user        | []           |
-| Profile            | `name:string ,fname:string, id: string, place: string, debug: array` | navigation | GET /places POST / | []           |
-| Scan               | `name:string ,fname:string, id: string, place: string, debug: array` | navigation | GET /places        | []           |
-| Leave              | `name:string ,fname:string, id: string, place: string, debug: array` | navigation | POST /             | []           |
+| Home               |                                                                      | navigation |                    | [x]           |
+| Login              | `name:string ,fname:string, id: string, place: string, search: Array<object> debug: Array<any>` | navigation | /login_user        | [x]           |
+| Profile            | `name:string ,fname:string, id: string, place: string, search: Array<object> debug: Array<any>` | navigation | GET /places POST / | [x]           |
+| Scan               | `name:string ,fname:string, id: string, place: string, search: Array<object> debug: Array<any>` | navigation | GET /places        | [x]           |
+| Leave              | `name:string ,fname:string, id: string, place: string, search: Array<object> debug: Array<any>` | navigation | POST /             | [x]           |

@@ -1,3 +1,5 @@
+// @flow
+
 import React from "react";
 import { View, AsyncStorage } from "react-native";
 
@@ -10,10 +12,10 @@ import {
   ListItem,
   SearchBar
 } from "react-native-elements";
-import styles from "./LoginScreenStyles";
-import server from "../../config/server";
-import config from "../../config/api";
-import { omit } from 'ramda';
+import { omit } from "ramda";
+import styles from './LoginScreenStyles';
+import server from '../../config/server';
+import config from '../../config/api';
 import type { State, Props } from './LoginScreenType';
 
 class LoginScreen extends React.Component<Props, State> {
@@ -29,7 +31,7 @@ class LoginScreen extends React.Component<Props, State> {
       id: "",
       place: "",
       debug: "",
-      historical: "",
+      historical: ""
     };
   }
 
@@ -45,7 +47,7 @@ class LoginScreen extends React.Component<Props, State> {
       this.state.fname !== "" &&
       this.state.id !== ""
     ) {
-      let payload = {
+      const payload = {
         name: this.state.name,
         fname: this.state.fname,
         id_user: this.state.id,
@@ -54,7 +56,7 @@ class LoginScreen extends React.Component<Props, State> {
       };
 
       AsyncStorage.setItem("USER", JSON.stringify(this.state));
-      fetch(server.address + "/login_user", {
+      fetch(`${server.address}/login_user`, {
         method: "POST",
         body: JSON.stringify(payload),
         headers: {
@@ -64,11 +66,14 @@ class LoginScreen extends React.Component<Props, State> {
       })
         .then(res => res.json())
         .then(data => {
-          let redirect: boolean = true;
+          const redirect: boolean = true;
 
           if (redirect) {
-            AsyncStorage.setItem("USER", JSON.stringify(omit('debug', this.state)));
-            console.log("REDIRECT Profile")
+            AsyncStorage.setItem(
+              "USER",
+              JSON.stringify(omit("debug", this.state))
+            );
+            console.log("REDIRECT Profile");
             navigation.goBack();
             navigation.navigate("Profile");
           }
