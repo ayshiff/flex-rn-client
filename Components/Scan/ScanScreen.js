@@ -1,3 +1,5 @@
+// @flow
+
 import React, { Component } from 'react';
 import { AsyncStorage } from 'react-native';
 import {
@@ -7,6 +9,20 @@ import QRCodeScanner from 'react-native-qrcode-scanner';
 import config from '../../config/api';
 import server from '../../config/server';
 import styles from './ScanScreenStyles';
+import { sendToServ, getPlaces, goTo } from '../../utils/utils';
+
+type State = {
+  name: string,
+  fname: string,
+  id: string,
+  place: string,
+  historical: Array<object> | string,
+  debug: Array<any> | string
+};
+
+type Props = {
+  navigation: NavigationScreenProp<{}>
+};
 
 class ScanScreen extends Component {
   static navigationOptions = {
@@ -20,90 +36,42 @@ class ScanScreen extends Component {
       fname: '',
       id: '',
       place: '',
-      debug: ''
+      debug: '',
+      historical: ''
     }
   }
 
   componentDidMount() {
+    const { id } = this.state
     AsyncStorage.getItem('USER', (err, result) => {
-      if (err || result == null) this.goTo('Login');
+      if (err || result === null) goTo(this, 'Login');
       else {
         this.setState(JSON.parse(result))
+        const userId = JSON.parse(result).id
+        fetch(`${server.address}users/${userId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'x-access-token': config.token,
+          },
+        })
+          .then(res => res.json()) // transform data to json
+          .then((data) => {
+            this.setState({ historical: data[0].historical })
+          });
       }
     })
   }
 
   onSuccess = (e) => {
     this.setState({ place: e.data })
-    this.getPlaces(this, this.sendToServ)
+    getPlaces(this, sendToServ)
   };
-
-  sendToServ(ctx, json) {
-    if (
-      ctx.state.name !== '' &&
-      ctx.state.fname !== '' &&
-      ctx.state.id !== '' &&
-      ctx.state.place !== ''
-    ) {
-      const ctx = ctx || window
-
-      const payload = {
-        name: ctx.state.name,
-        fname: ctx.state.fname,
-        id_user: ctx.state.id,
-        id_place: ctx.state.place,
-      }
-
-      fetch(server.address, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': config.token,
-        },
-      })
-        .then(res => res.json())
-        .then((data) => {
-          let redirect = true
-          // let redirectRefacto = json.map(element => payload.id_place == element.id && element.using ? redirect = false : true )
-          json.forEach((element) => {
-            if (payload.id_place == element.id && element.using) redirect = false
-          });
-          if (redirect) {
-            AsyncStorage.setItem('USER', JSON.stringify(ctx.state))
-
-            ctx.goTo('Leave');
-          }
-        })
-    }
-  }
-
-  getPlaces(ctx, fn) {
-    ctx = ctx || window
-
-    fetch(`${server.address}places/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'x-access-token': config.token,
-      },
-    })
-      .then(res => res.json()) // transform data to json
-      .then((data) => {
-        fn(ctx, data)
-      });
-  }
-
-  goTo(str) {
-    const { navigation } = this.props
-    navigation.popToTop()
-    navigation.navigate(str)
-  }
 
   render() {
     return (
       <QRCodeScanner
-        onRead={this.onSuccess()}
+        onRead={this.onSuccess.bind(this)}
         topContent={<Text style={styles.centerText}>Scan the QR code.</Text>}
       />
     )

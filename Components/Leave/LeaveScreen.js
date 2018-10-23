@@ -8,6 +8,8 @@ import config from "../../config/api";
 import server from "../../config/server";
 import styles from "./LeaveScreenStyles";
 import type { State, Props } from "./LeaveScreenType";
+import { getPlaces, goTo } from '../../utils/utils';
+
 
 type Payload = {
   name: string,
@@ -59,15 +61,17 @@ class LeaveScreen extends React.Component<Props, State> {
       })
       .then(data => {
         ctx.state.debug = "";
+        ctx.state.place = "";
         AsyncStorage.setItem("USER", JSON.stringify(ctx.state));
-        ctx.goTo("Profile");
+        goTo(ctx, "Profile");
       });
   }
 
   componentDidMount() {
     AsyncStorage.getItem("USER", (err, result) => {
-      if (err || result == null) this.goTo("Login");
+      if (err || result == null) goTo(this, "Login");
       else {
+        console.log(result)
         this.setState(JSON.parse(result));
         const userId: string = JSON.parse(result).id;
         fetch(`${server.address}users/${userId}`, {
@@ -85,20 +89,13 @@ class LeaveScreen extends React.Component<Props, State> {
     });
   }
 
-  goTo(str: string) {
-    const navigation = this.props.navigation;
-    navigation.popToTop();
-    navigation.navigate(str);
-  }
-
   render() {
     const { fname, name, id, place } = this.state;
     return (
       <Card style={styles.view}>
         <Text>
           {fname}
-          {name}[
-{id}
+          {name}[{id}
           ]:
           {place}
         </Text>

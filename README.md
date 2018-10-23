@@ -44,6 +44,7 @@ You will also need to install the Xcode Command Line Tools. Open Xcode, then cho
 Run ```react-native run-ios``` inside your React Native project folder:
 ```
 cd flex-rn-client
+npm install
 react-native run-ios
 ```
 
@@ -70,6 +71,8 @@ module.exports = {
 };
 ```
 
+You can also add a `.env` file at the root of the project and pass variables as environment variables.
+
 
 ## Generating Signed APK
 
@@ -81,6 +84,7 @@ See the **[current doc](https://facebook.github.io/react-native/docs/signed-apk-
 # Project Structure
 
 ```
+.
 ├── App.js
 ├── Components
 │   ├── Home
@@ -88,13 +92,19 @@ See the **[current doc](https://facebook.github.io/react-native/docs/signed-apk-
 │   │   └── HomeScreenStyles.js
 │   ├── Leave
 │   │   ├── LeaveScreen.js
-│   │   └── LeaveScreenStyles.js
+│   │   ├── LeaveScreenStyles.js
+│   │   └── LeaveScreenType.js
 │   ├── Login
 │   │   ├── LoginScreen.js
-│   │   └── LoginScreenStyles.js
+│   │   ├── LoginScreenStyles.js
+│   │   └── LoginScreenType.js
 │   ├── Profile
+│   │   ├── Places
+│   │   │   └── PlacesScreen.js
 │   │   ├── ProfileScreen.js
-│   │   └── ProfileScreenStyles.js
+│   │   ├── ProfileScreenStyles.js
+│   │   └── Users
+│   │       └── UsersScreen.js
 │   └── Scan
 │       ├── ScanScreen.js
 │       └── ScanScreenStyles.js
@@ -135,5 +145,5 @@ The project also use [ESlint](https://eslint.org/) and [Prettier](https://pretti
 | Home               |                                                                      | navigation |                    | [x]           |
 | Login              | `name:string ,fname:string, id: string, place: string, search: Array<object> debug: Array<any>` | navigation | /login_user        | [x]           |
 | Profile            | `name:string ,fname:string, id: string, place: string, search: Array<object> debug: Array<any>` | navigation | GET /places POST / | [x]           |
-| Scan               | `name:string ,fname:string, id: string, place: string, search: Array<object> debug: Array<any>` | navigation | GET /places        | [x]           |
+| Scan               | `name:string ,fname:string, id: string, place: string, search: Array<object> debug: Array<any>` | navigation | GET /places        | []           |
 | Leave              | `name:string ,fname:string, id: string, place: string, search: Array<object> debug: Array<any>` | navigation | POST /             | [x]           |

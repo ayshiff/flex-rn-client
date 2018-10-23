@@ -6,11 +6,10 @@ export default StyleSheet.create({
     flexDirection: 'column'
   },
   view_second: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     margin: 5,
   },
   text_first: {
+    textAlign: 'center',
     margin: 5,
     marginTop: 8,
     fontSize: 20,

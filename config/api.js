@@ -1,7 +1,7 @@
 module.exports = {
   'email': '',
   'password': '',
-  'token': '',
+  'token': ''
   '_id': ''
 };
 
