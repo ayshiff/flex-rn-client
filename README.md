@@ -41,7 +41,7 @@ If you have already installed Xcode on your system, make sure it is version 9.4 
 
 You will also need to install the Xcode Command Line Tools. Open Xcode, then choose "Preferences..." from the Xcode menu. Go to the Locations panel and install the tools by selecting the most recent version in the Command Line Tools dropdown.
 
-## Running your React Native application
+## Running your React Native application on iOS Device simulator
 
 Run ```react-native run-ios``` inside your React Native project folder:
 ```
@@ -84,6 +84,50 @@ And for `regex.json`:
 
 You can also add a `.env` file at the root of the project and pass variables as environment variables.
 
+## Run on a real iOS Device
+
+1. Go to your Apple Dev Center account : declare phone UDID, App Id, Profile, Certificate
+2. In Terminal, clone the project and run on the project root directory
+```
+yarn install
+```
+3. Go to ios folder and open Xcode project
+```
+open FlexOffice.xcodeproj
+```
+4. In Xcode, use dev certificate for targets (main and test)
+5. Modify App Delegate implementation : 
+```
+FlexOfficeDelegate.m
+--------------------
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  NSURL *jsCodeLocation;
+
+#ifdef DEBUG
+  jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+#else
+  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+#endif
+  (...)
+  return YES;
+}
+
+```
+
+6. In Terminal, launch following command : 
+```
+react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios 
+```
+
+7. Build in Xcode
+8. Copy ```ios/main.jsbundle``` and paste into FlexOffice.app folder.
+
+Ex : 
+```
+/Users/<user>/Library/Developer/Xcode/DerivedData/FlexOffice-cpkjlqzwsfrxcheazdsfgbnyfzbv/Build/Products/Release-iphoneos/FlexOffice.app/
+```
+9. Run the app in Xcode
 
 ## Generating Signed APK
 
