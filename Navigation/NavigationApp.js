@@ -1,19 +1,103 @@
-import React from 'react'
-import { Button, AsyncStorage, Image, TouchableHighlight, View } from 'react-native';
-import { createStackNavigator, createTabNavigator } from 'react-navigation'
-import HomeScreen from '../Components/Home/HomeScreen'
-import LoginScreen from '../Components/Login/LoginScreen'
-import ProfileScreen from '../Components/Profile/ProfileScreen'
-import LeaveScreen from '../Components/Leave/LeaveScreen'
-import ScanScreen from '../Components/Scan/ScanScreen'
-import PlacesScreen from '../Components/Profile/Places/PlacesScreen'
-import UsersScreen from '../Components/Profile/Users/UsersScreen'
-import OfflineNotice from '../utils/OfflineNotice';
+import React from "react";
+import {
+  Image,
+  TouchableHighlight,
+  View,
+  Text,
+  AsyncStorage
+} from "react-native";
+import { createStackNavigator, createTabNavigator } from "react-navigation";
+import LinearGradient from "react-native-linear-gradient";
+import Icon from "react-native-vector-icons/FontAwesome";
+import LoginScreen from "../Components/Login/LoginScreen";
+import ProfileScreen from "../Components/Profile/ProfileScreen";
+import LeaveScreen from "../Components/Leave/LeaveScreen";
+import SettingsScreen from "../Components/Settings/SettingsScreen";
+import PlacesScreen from "../Components/Profile/Places/PlacesScreen";
+import UsersScreen from "../Components/Profile/Users/UsersScreen";
+import OfflineNotice from "../utils/OfflineNotice";
+import profilePicture from "../assets/profile.png";
+import logo from "../assets/logo.png";
+import ProfileImage from "./components/ProfileImage";
+// import LocationNotice from "../utils/LocationNotice";
 
-import I18n from '../i18n/i18n';
+const fetchUserPhoto = async () => {
+  const userPhoto = await AsyncStorage.getItem("USER");
+  console.log("sdffdfds", JSON.parse(userPhoto).photo);
+  return JSON.parse(userPhoto).photo;
+};
+
+export const headerBar = (navigation, goBack = false, rightElement = true) => (
+  <View
+    style={{
+      paddingTop: 20 /* only for IOS to give StatusBar Space */,
+      backgroundColor: "white",
+      height: 80
+    }}
+  >
+    <View
+      style={{
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between"
+      }}
+    >
+      {/* Header Left */}
+      {goBack ? (
+        <TouchableHighlight onPress={() => navigation.goBack()}>
+          <Icon
+            style={{ marginLeft: 20 }}
+            name="angle-left"
+            size={35}
+            color="#2E89AD"
+          />
+        </TouchableHighlight>
+      ) : (
+        <Image
+          source={logo}
+          style={{
+            width: 30,
+            height: 30,
+            margin: 10,
+            resizeMode: "contain"
+          }}
+        />
+      )}
+
+      <Text
+        style={{
+          color: "black",
+          fontWeight: "bold",
+          fontSize: 20,
+          fontFamily: "Raleway"
+        }}
+      >
+        Flex-Office
+      </Text>
+
+      {/* Header Right */}
+      <TouchableHighlight
+        onPress={() => {
+          if (rightElement) {
+            navigation.navigate("SettingsScreen");
+            fetchUserPhoto();
+          }
+        }}
+      >
+        <ProfileImage />
+      </TouchableHighlight>
+    </View>
+    <LinearGradient
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      colors={["#58C0D0", "#468BB6", "#3662A0"]}
+      style={{ width: "100%", height: 7 }}
+    />
+  </View>
+);
 
 const NavigationApp = createStackNavigator({
-  Home: { screen: HomeScreen },
   Login: { screen: LoginScreen },
   Profile: {
     screen: createTabNavigator(
@@ -27,48 +111,56 @@ const NavigationApp = createStackNavigator({
         tabBarPosition: "bottom",
         swipeEnabled: true,
         tabBarOptions: {
-            labelStyle: {
-            fontSize: 10,
-            },
+          labelStyle: {
+            fontSize: 13,
+            margin: 0,
+            padding: 0,
+            fontFamily: "Raleway"
+          },
           showLabel: true,
           showIcon: true,
-          activeTintColor: "#5167A4",
-          activeBackgroundColor: 'rgba(143, 158, 201, 0.4)',
+          inactiveTintColor: "#3662A0",
+          activeTintColor: "#58C0D0",
+          backgroundColor: "white", // "#58C0D0"
+          // activeBackgroundColor: "white",
           style: {
-            backgroundColor: '#ffffff',
+            // backgroundColor: "#2E89AD",
+            backgroundColor: "white",
+            height: 50
           },
           indicatorStyle: {
-            backgroundColor: 'white'
+            backgroundColor: "white"
           }
         }
       }
     ),
-    navigationOptions: ({ navigation }) => {
-      return {
-      title: "Flex-Office",
-      headerTintColor: 'black',
-      headerRight: 
-        <TouchableHighlight onPress={() => {
-          AsyncStorage.removeItem('USER');
-          navigation.popToTop();
-          navigation.navigate('Login');
-        }}>
-        <Image
-        source={require('../assets/logout.png')}
-        style={{width: 22, height: 22, margin: 10, resizeMode: "contain"}} />
-        </TouchableHighlight>
-      }
-    }
+    navigationOptions: ({ navigation }) => ({
+      /* Custom header */
+      header: headerBar(navigation)
+    })
   },
-  Leave: { screen: LeaveScreen },
-  Scan: { screen: ScanScreen }
+  Leave: {
+    screen: LeaveScreen,
+    navigationOptions: ({ navigation }) => ({
+      /* Custom header */
+      header: headerBar(navigation, false, false)
+    })
+  },
+  SettingsScreen: {
+    screen: SettingsScreen,
+    navigationOptions: ({ navigation }) => ({
+      /* Custom header */
+      header: headerBar(navigation, true)
+    })
+  }
 });
 
 const NetInfoWrapper = () => (
-  <View style={{flex: 1}}>
-  <OfflineNotice/>
-  <NavigationApp/>
+  <View style={{ flex: 1 }}>
+    <OfflineNotice />
+    <NavigationApp />
+    {/* <LocationNotice /> */}
   </View>
-)
+);
 
-export default NetInfoWrapper
+export default NetInfoWrapper;

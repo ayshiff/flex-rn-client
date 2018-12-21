@@ -1,14 +1,13 @@
-import 'react-native';
-import React from 'react';
-import LeaveScreen from '../../Components/Leave/LeaveScreen';
+import "react-native";
+import React from "react";
+import * as enzyme from "enzyme";
+import ReactSixteenAdapter from "enzyme-adapter-react-16";
+import LeaveScreen from "../../Components/Leave/LeaveScreen";
 
-import renderer from 'react-test-renderer';
+enzyme.configure({ adapter: new ReactSixteenAdapter() });
 
 const navigation = { navigate: jest.fn(), popToTop: jest.fn() };
 
-it('renders correctly', () => {
-  const tree = renderer.create(
-    <LeaveScreen navigation={navigation} />
-    ).toJSON();
-  expect(tree).toMatchSnapshot();
+it("renders correctly", () => {
+  enzyme.shallow(<LeaveScreen navigation={navigation} />);
 });

@@ -1,31 +1,34 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
   place_view: {
-    justifyContent: 'center',
-    alignItems: 'center'
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 100
   },
-    user_view: {
-    backgroundColor: 'white',
-    borderRadius: 5,
-    borderColor: '#5167A4',
-    borderWidth: 2,
-    height: 50,
-    margin: 20,
+  user_view: {
+    // backgroundColor: "white",
+    // borderRadius: 5,
+    // borderColor: "#2E89AD",
+    // borderWidth: 2,
+    // height: 50,
+    // margin: 20
   },
   user: {
-    textAlign: 'center',
-    color: '#5167A4',
+    textAlign: "center",
+    color: "#2E89AD",
     margin: 5,
     marginTop: 8,
     fontSize: 20,
+    fontFamily: "Raleway"
   },
   place: {
-    textAlign: 'center',
-    color: '#5167A4',
-    fontSize: 15,
+    textAlign: "center",
+    color: "#fff",
+    fontSize: 15
   },
   button: {
-    marginTop: 20,
-  },
-})
+    marginTop: 20
+  }
+});

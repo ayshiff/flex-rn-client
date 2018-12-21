@@ -1,14 +1,14 @@
-import 'react-native';
-import React from 'react';
-import LoginScreen from '../../Components/Login/LoginScreen';
+import "react-native";
+import React from "react";
+import * as enzyme from "enzyme";
+import ReactSixteenAdapter from "enzyme-adapter-react-16";
+import LoginScreen from "../../Components/Login/LoginScreen";
+import "isomorphic-fetch";
 
-import renderer from 'react-test-renderer';
+enzyme.configure({ adapter: new ReactSixteenAdapter() });
 
 const navigation = { navigate: jest.fn(), popToTop: jest.fn() };
 
-it('renders correctly', () => {
-  const tree = renderer.create(
-    <LoginScreen navigation={navigation} />
-    ).toJSON();
-  expect(tree).toMatchSnapshot();
+it("renders correctly", () => {
+  enzyme.shallow(<LoginScreen navigation={navigation} />);
 });
