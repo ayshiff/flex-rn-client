@@ -1,21 +1,36 @@
 // @flow
-import React from 'react'
-import { Card, FormInput, FormLabel, ListItem } from 'react-native-elements'
+/* eslint-disable */
+import React from "react";
+import {
+  Card,
+  FormInput,
+  FormLabel,
+  ListItem,
+  Button
+} from "react-native-elements";
+import Icon from "react-native-vector-icons/FontAwesome";
 
-import { ActivityIndicator, AsyncStorage, Image, ScrollView, TextInput, View } from 'react-native'
-import { NavigationScreenProp } from 'react-navigation'
-import config from '../../../config/api'
-import server from '../../../config/server'
-import styles from '../ProfileScreenStyles'
-import picUser from '../../../assets/users.png'
+import {
+  ActivityIndicator,
+  AsyncStorage,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  TouchableHighlight,
+  View
+} from "react-native";
+import { append, filter, omit } from "ramda";
+import { NavigationScreenProp } from "react-navigation";
+import I18n from "react-native-i18n";
+import config from "../../../config/api";
+import server from "../../../config/server";
+import styles from "../ProfileScreenStyles";
+import picUser from "../../../assets/users.png";
 
-import {  goTo } from '../../../utils/utils';
+import { goTo } from "../../../utils/utils";
 
-import { append } from 'ramda';
-
-import I18n from 'react-native-i18n'
-import FindPlacesCard from './components/FindPlacesCard'
-import ListPlaces from './components/ListPlaces'
+import FindPlacesCard from "./components/FindPlacesCard";
+import ListPlaces from "./components/ListPlaces";
 
 type State = {
   users: Array<any> | string
@@ -26,172 +41,340 @@ type Props = {
 };
 
 class UsersScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: I18n.t('users.title'),
-    tabBarIcon: () => {
-      return <Image source={picUser} resizeMode="contain" style={{
-        width: 20,
-        height: 20
-      }}/>
-    }
-  }
+  static navigationOptions = ({ navigation }) => {
+    console.log(navigation);
+    return {
+      title: I18n.t("users.title"),
+      tabBarIcon: ({ tintColor }) => (
+        <Icon name="users" size={20} color={tintColor} />
+      )
+    };
+  };
 
-  _isMounted = false
+  _isMounted = false;
 
   constructor() {
-    super()
+    super();
     this.state = {
       users: [],
-      search: '',
+      search: "",
       userName: null,
-      loading: false
-    }
+      loading: false,
+      arrayOfFriends: [],
+      friendLoading: false,
+      friend: []
+    };
   }
 
-  componentDidMount() {
-    const { id } = this.state
-    AsyncStorage.getItem('USER', (err, result) => {
+  componentDidMount = async () => {
+    const { id } = this.state;
+    const { navigation } = this.props;
+
+    await AsyncStorage.getItem("USER", (err, result) => {
       if (err || result === null) {
-        goTo(this, 'Login')
+        goTo(this, "Login");
       } else {
-        const userName = JSON.parse(result).name
-        const userFName = JSON.parse(result).fname
-        const isRemote = JSON.parse(result).isRemote
-        const historical = JSON.parse(result).historical
-        const id = JSON.parse(result).id
-        this.setState({ userName: `${userName}/${userFName}`,
-        isRemote,
-        name: JSON.parse(result).name,
-        fname: JSON.parse(result).fname,
-        historical,
-        id })
+        const userName = JSON.parse(result).name;
+        const userFName = JSON.parse(result).fname;
+        const remoteDay = JSON.parse(result).remoteDay;
+        const historical = JSON.parse(result).historical;
+        const friend = JSON.parse(result).friend;
+        const id = JSON.parse(result).id;
+        this.setState({
+          userName: `${userName}/${userFName}`,
+          remoteDay,
+          name: JSON.parse(result).name,
+          fname: JSON.parse(result).fname,
+          historical,
+          id,
+          friend
+        });
+        this.fetchFriends();
+      }
+    });
+
+    this._isMounted = true;
+    this.getUsers();
+  };
+
+  componentWillUnmount = () => {
+    this._isMounted = false;
+  };
+
+  addFriend = item => {
+    const { navigation } = this.props;
+    if (!this.state.friendLoading) {
+      const newListOfUSers = this.state.users.filter(e => e.id !== item.id);
+      this.setState({
+        users: newListOfUSers,
+        arrayOfFriends: append(item, this.state.arrayOfFriends),
+        friendLoading: true
+      });
+      const payload = {
+        id_user: this.state.id,
+        id: item.id,
+        name: item.name,
+        fname: item.fname,
+        id_place: item.id_place,
+        photo: item.photo
+      };
+
+      fetch(`${server.address}add_friend`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": config.token
+        }
+      })
+        .then(res => res.json()) // transform data to json
+        .then(friend => {
+          this.setState({
+            friend: append(item, friend.user.friend)
+          });
+          AsyncStorage.setItem("USER", JSON.stringify(this.state));
+          this.setState({ friendLoading: false });
+        });
+    }
+  };
+
+  fetchFriends = () => {
+    const { id } = this.state;
+    fetch(`${server.address}users/${id}/friends`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": config.token
       }
     })
-    this._isMounted = true
-    this.getUsers()
-  }
+      .then(res => res.json())
+      .then(arrayOfFriends => this.setState({ arrayOfFriends }));
+  };
 
-  getUsers() {
-    this.setState({ loading: true })
+  getUsers = () => {
+    this.setState({ loading: true });
     fetch(`${server.address}users/`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'x-access-token': config.token
+        "Content-Type": "application/x-www-form-urlencoded",
+        "x-access-token": config.token
       }
     })
       .then(res => res.json()) // transform data to json
-      .then((users) => {
-        if (this._isMounted) this.setState({ users })
-        this.setState({ loading: false })
-      })
+      .then(users => {
+        if (this._isMounted) {
+          // Here we check if users are in the friend list
+          const filteredUsers = users.filter(
+            word => !this.state.friend.find(e => e.id === word.id)
+          );
+          // Here we want to refresh the friend list
+          const filteredFriends = users.filter(word =>
+            this.state.friend.find(e => e.id === word.id)
+          );
+          this.setState({
+            users: this.state.friend.length > 0 ? filteredUsers : users,
+            arrayOfFriends: filteredFriends
+          });
+        }
+        this.setState({ loading: false });
+      });
   };
 
-  componentWillUnmount() {
-    this._isMounted = false
-  }
-
-  _handleSearch = (search) => {
-    this.setState({ search })
-  }
+  _handleSearch = search => {
+    this.setState({ search });
+    if (search.length >= 3) this.getUsers();
+  };
 
   _handleList = () => {
-    const { users, search } = this.state
+    const { users, search } = this.state;
+    const newT: string | Array<object> =
+      users !== []
+        ? users.filter(e => {
+            let finalResult = true;
+            for (const element in search) {
+              if (
+                search[element] !== e.name[element] &&
+                search[element] !== e.fname[element]
+              ) {
+                finalResult = false;
+              }
+            }
+            return finalResult;
+          })
+        : users;
 
-    const newT: string | Array<object> = users !== []
-      ? users.filter((e) => {
-        let finalResult = true
-        for (const element in search) {
-          if (search[element] !== e.name[element]) {
-            finalResult = false
-          }
-        }
-        return finalResult
-      })
-      : users
     newT.sort((a, b) => {
-      if (a.name < b.name) return -1
-      if (a.name > b.name) return 1
-      return 0
-    })
+      if (a.name < b.name) return -1;
+      if (a.name > b.name) return 1;
+      return 0;
+    });
     users.sort((a, b) => {
-      if (a.name < b.name) return -1
-      if (a.name > b.name) return 1
-      return 0
-    })
-    return search === '' ? users : newT
-  }
+      if (a.name < b.name) return -1;
+      if (a.name > b.name) return 1;
+      return 0;
+    });
+    return search === "" ? users : newT;
+  };
 
-  // async getFriends (item) {
-  //  const value = await AsyncStorage.getItem('friend');
-  //  JSON.parse(value).push({name: item.name, fname: item.fname})
-  //  AsyncStorage.setItem("friend", JSON.stringify(value))
-  //   const payload = {
-  //     isRemote: this.state.isRemote,
-  //     name: this.state.name,
-  //     fname: this.state.fname,
-  //     historical: this.state.historical,
-  //     id_user: this.state.id,
-  //     id_place: "",
-  //     friends: append({name: item.name, fname: item.fname}, this.state.friends)
-  //   }
+  removeFriend = friend => {
+    const { id, arrayOfFriends } = this.state;
+    const isRemovedUser = userFriend => userFriend.id !== friend.id;
+    this.setState({
+      arrayOfFriends: filter(isRemovedUser, arrayOfFriends),
+      friend: filter(isRemovedUser, this.state.friend),
+      users: append(friend, this.state.users)
+    });
+    if (!this.state.friendLoading) {
+      this.setState({ friendLoading: true });
+      const { navigation } = this.props;
+      const payload = {
+        id_user: id,
+        id: friend.id
+      };
 
-  //   fetch(`${server.address}`, {
-  //     method: 'POST',
-  //     body: JSON.stringify(payload),
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'x-access-token': config.token
-  //     }
-  //   })
-  //     .then(res => res.json())
-  //     .then(data => {
-  //        AsyncStorage.getItem('USER', (err, result) => {
-  //          const res = JSON.parse(result);
-  //          const friends = append({name: item.name, fname: item.fname}, result.friends)
-  //          this.state["friends"] = friends;
-  //         AsyncStorage.setItem('USER', JSON.stringify(this.state))
-  //         goTo(this, 'FriendScreen')
-  //        })
-  //     })
-  // }
+      fetch(`${server.address}remove_friend`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": config.token
+        }
+      })
+        .then(res => res.json()) // transform data to json
+        .then(friendUser => {
+          AsyncStorage.setItem(
+            "USER",
+            JSON.stringify(omit(["arrayOfFriends"], this.state))
+          );
+          this.setState({ friendLoading: false });
+        });
+    }
+  };
 
   render() {
-    const navigation = this.props.navigation
-    const { users, loading } = this.state
+    const { users, loading, userName, arrayOfFriends } = this.state;
 
     return (
       <ScrollView style={styles.view}>
-        <Card>
-          <FindPlacesCard users={this.getUsers.bind(this)}/>
-          <FormLabel>{I18n.t('users.find')}</FormLabel>
-          <FormInput
-            onChangeText={this._handleSearch}
+        <View style={{ marginLeft: 40, marginRight: 40 }}>
+          <View
             style={{
-              backgroundColor: 'white',
-              marginTop: 10
+              flex: 1,
+              flexDirection: "row",
+              justifyContent: "space-around",
+              alignItems: "center",
+              marginBottom: 10
             }}
-            placeholder={I18n.t('users.search_user')}
-          />
-          {users !== [] && users && !loading ? (
-            <ListPlaces handleList={this._handleList()}
-                        prop1={item => item && `${item.name}/${item.fname}` !== this.state.userName ?
-                          (
-                            <ListItem
-                              rightIcon={{
-                                name: item.id_place ? 'toggle-on' : item.isRemote ? 'home' :'toggle-off',
-                                type: 'font-awesome'
-                              }}
-                              key={item.id}
-                              title={`${item.name} / ${item.fname}`}
-                              subtitle={item.id_place}
-                            />
-                          ) : null}/>
-          ) : <ActivityIndicator style={{ marginTop: 20 }} size="large" color="#5167A4"/>}
-        </Card>
+          >
+            <FormInput
+              onChangeText={search => this._handleSearch(search)}
+              style={{
+                backgroundColor: "white"
+              }}
+              containerStyle={{ marginTop: 20, marginBottom: 20, width: 220 }}
+              placeholder={I18n.t("users.search_user")}
+            />
+            <TouchableOpacity
+              onPress={() => this.getUsers()}
+              style={{
+                backgroundColor: "#fff",
+                shadowOpacity: 0.4,
+                shadowRadius: 2,
+                shadowColor: "#3662A0",
+                shadowOffset: { height: 1, width: 0 },
+                borderRadius: 17.5,
+                width: 35,
+                height: 35,
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              <Icon name="arrow-right" size={15} color="#2E89AD" />
+            </TouchableOpacity>
+          </View>
+          {/* <FindPlacesCard users={() => this.getUsers()} /> */}
+          {!loading ? (
+            <View>
+              <View style={{ marginBottom: -22 }}>
+                {arrayOfFriends.map(friend => {
+                  if (friend)
+                    return (
+                      <ListItem
+                        onPress={() => this.removeFriend(friend)}
+                        key={friend.id}
+                        title={`${friend.name} / ${friend.fname}`}
+                        subtitle={friend.id_place}
+                        fontFamily="Raleway"
+                        rightIcon={{
+                          name: "star",
+                          color: "#2E89AD"
+                        }}
+                        roundAvatar
+                        avatar={
+                          friend.photo !== ""
+                            ? { uri: friend.photo }
+                            : require("../../../assets/profile.png")
+                        }
+                        avatarStyle={{
+                          backgroundColor: "white",
+                          width: 33,
+                          height: 33,
+                          resizeMode: "contain"
+                        }}
+                      />
+                    );
+                  return null;
+                })}
+              </View>
+              {users !== [] && users ? (
+                <ListPlaces
+                  handleList={this._handleList()}
+                  prop1={item =>
+                    item && `${item.name}/${item.fname}` !== userName ? (
+                      <TouchableOpacity
+                        key={item.id}
+                        onPress={() => this.addFriend(item)}
+                      >
+                        <ListItem
+                          onPress={() => this.addFriend(item)}
+                          title={`${item.name} / ${item.fname}`}
+                          subtitle={item.id_place}
+                          fontFamily="Raleway"
+                          roundAvatar
+                          rightIcon={{
+                            name: "star-border",
+                            color: "#2E89AD"
+                          }}
+                          avatar={
+                            item.photo !== ""
+                              ? { uri: item.photo }
+                              : require("../../../assets/profile.png")
+                          }
+                          avatarStyle={{
+                            backgroundColor: "white",
+                            width: 33,
+                            height: 33,
+                            resizeMode: "contain"
+                          }}
+                        />
+                      </TouchableOpacity>
+                    ) : null
+                  }
+                />
+              ) : null}
+            </View>
+          ) : (
+            <ActivityIndicator
+              style={{ marginTop: 40 }}
+              size="large"
+              color="#2E89AD"
+            />
+          )}
+        </View>
       </ScrollView>
-    )
+    );
   }
 }
 
-export default UsersScreen
+export default UsersScreen;

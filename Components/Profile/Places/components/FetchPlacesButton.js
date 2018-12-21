@@ -1,27 +1,17 @@
-import { View } from 'react-native'
-import styles from '../../ProfileScreenStyles'
-import { Button } from 'react-native-elements'
-import I18n from '../../../../i18n/i18n'
-import React from 'react'
-import QRCodeCard from '../../components/QRCodeCard'
+import React from "react";
+import { View, TouchableOpacity } from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome";
+import styles from "./styles/FetchPlacesButtonStyle";
 
-const FetchPlacesButton = (props: { onPress: () => void }) => (
-  <View style={styles.emptyPlaces_container}>
-    <Button
-      iconRight={{
-        name: 'sync',
-        type: 'font-awesome5'
-      }}
-      fontWeight="bold"
-      large={false}
-      borderRadius={15}
-      backgroundColor="#5167A4"
-      color="#fff"
-      style={styles.free_places}
-      title={I18n.t('places.free_places')}
-      onPress={props.onPress}
-    />
-  </View>
-)
+const FetchPlacesButton = (props: { onPress: () => void }) => {
+  const { onPress } = props;
+  return (
+    <View style={styles.view}>
+      <TouchableOpacity onPress={onPress} style={styles.container}>
+        <Icon name="arrow-right" size={15} color="#2E89AD" />
+      </TouchableOpacity>
+    </View>
+  );
+};
 
-export default FetchPlacesButton
+export default FetchPlacesButton;

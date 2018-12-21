@@ -1,26 +1,36 @@
 // @flow
-import React from 'react'
+/* eslint-disable */
+
+import React from "react";
 import {
   ButtonGroup,
-  Card,
-  FormInput,
-  FormLabel,
   List,
   ListItem,
-  Text
-} from 'react-native-elements'
+  Text,
+} from "react-native-elements";
 
-import { ActivityIndicator, AsyncStorage, Image, ScrollView, TextInput, View, TouchableOpacity } from 'react-native'
-import { NavigationScreenProp } from 'react-navigation'
-import config from '../../../config/api'
-import server from '../../../config/server'
-import styles from '../ProfileScreenStyles'
-import picProfile from '../../../assets/place.png'
-import { getPlaces, goTo } from '../../../utils/utils'
+import Icon from "react-native-vector-icons/FontAwesome";
 
-import I18n from '../../../i18n/i18n'
-import ZoneCard from './components/ZoneCard'
-import FetchPlacesButton from './components/FetchPlacesButton'
+import {
+  ActivityIndicator,
+  AsyncStorage,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  View
+} from "react-native";
+import { NavigationScreenProp } from "react-navigation";
+import config from "../../../config/api";
+import server from "../../../config/server";
+import styles from "../ProfileScreenStyles";
+import { getPlaces, goTo } from "../../../utils/utils";
+
+import I18n from "../../../i18n/i18n";
+
+/**
+ * List of components
+ */
+import FetchPlacesButton from "./components/FetchPlacesButton";
 
 type Historical = {
   place_id: string,
@@ -43,162 +53,115 @@ type Props = {
 };
 
 class PlacesScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: I18n.t('places.title'),
-    tabBarIcon: ({ focused, tintColor }) => (
-      <Image
-        source={picProfile}
-        resizeMode="contain"
-        style={{
-          width: 18,
-          height: 18
-        }}
-      />
-    )
-  }
+  static navigationOptions = ({ navigation }) => {
+    console.log(navigation);
+    return {
+      title: I18n.t("places.title"),
+      tabBarIcon: ({ tintColor }) => (
+        <Icon name="search" size={20} color={tintColor} />
+      )
+    };
+  };
 
-  _isMounted = false
+  _isMounted = false;
 
   constructor() {
-    super()
+    super();
     this.state = {
-      name: '',
-      fname: '',
-      id: '',
-      place: '',
-      debug: '',
-      search: '',
-      historical: [],
+      id: "",
+      debug: "",
+      search: "",
       RERZonechecked: false,
       ForestZonechecked: false,
       MiddleZonechecked: false,
       SouthZonechecked: false,
       selectedFloorIndex: 0,
-      loading: false
-    }
+      loading: false,
+      selectedZoneIndex: 0
+    };
   }
 
   componentDidMount() {
-    const { id } = this.state
-    this._isMounted = true
-    AsyncStorage.getItem('USER', (err, result) => {
+    const { id } = this.state;
+    this._isMounted = true;
+    AsyncStorage.getItem("USER", (err, result) => {
       if (err || result === null) {
-        goTo(this, 'Login')
+        goTo(this, "Login");
       } else {
-        if (this._isMounted) this.setState(JSON.parse(result))
-        const userId = JSON.parse(result).id
+        if (this._isMounted) this.setState(JSON.parse(result));
+        const userId = JSON.parse(result).id;
         fetch(`${server.address}users/${userId}`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'x-access-token': config.token
+            "Content-Type": "application/x-www-form-urlencoded",
+            "x-access-token": config.token
           }
         })
           .then(res => res.json()) // transform data to json
-          .then((data) => {
+          .then(data => {
             if (this._isMounted) {
-              this.setState({ historical: data[0].historical })
+              this.setState({ historical: data[0].historical });
             }
-          })
+          });
       }
-    })
-    getPlaces(this, this.setPlaces)
+    });
+    getPlaces(this, this.setPlaces);
   }
 
   componentWillUnmount() {
-    this._isMounted = false
+    this._isMounted = false;
   }
 
-  async setPlaces(ctx: State, json) {
+  setPlaces = async (ctx: State, json) => {
     const result = json.filter(
       element => element !== null && element.using === false
-    )
-    ctx.setState({ debug: result })
-  }
+    );
+    ctx.setState({ debug: result });
+  };
 
-  _handleSearch = (search) => {
-    this.setState({ search })
-  }
+  updateFloorIndex = selectedFloorIndex => {
+    this.setState({ selectedFloorIndex });
+  };
 
-  _handleList = () => {
-    const { 
-    debug,
-    search,
-    selectedFloorIndex,
-    RERZonechecked,
-    ForestZonechecked,
-    MiddleZonechecked,
-    SouthZonechecked
-    } = this.state
-
-    const floor = selectedFloorIndex === 0 ? 3 : 4
-
-    const newT: string | Array<object> = debug !== ''
-      ? debug.filter((e) => {
-        let finalResult = true
-
-      // Check the current selected floor
-        if (e.id[0] != floor) finalResult = false
-
-      // Check the current selected zone
-        if (
-          (RERZonechecked && e.id[1] != 3) || 
-          (ForestZonechecked && e.id[1] != 1) || 
-          (MiddleZonechecked && e.id[1] != 5) || 
-          (SouthZonechecked && e.id[1] != 4)) finalResult = false
-
-        for (const element in search) {
-          if (search[element] !== e.id[element]) {
-            finalResult = false
-          }
-        }
-        return finalResult
-      })
-      : debug
-    return newT
-  }
-
-  updateFloorIndex = (selectedFloorIndex) => {
-    this.setState({ selectedFloorIndex })
-  }
+  updateZoneIndex = selectedZoneIndex => {
+    this.setState({ selectedZoneIndex });
+  };
 
   /** This function is used to attach the current user to a place  */
-  getUser(ctx, element) {
+  getUser = (ctx, element) => {
     if (
-      ctx.state.name !== '' &&
-      ctx.state.fname !== '' &&
-      ctx.state.id !== '' &&
-      element.id !== ''
+      ctx.state.name !== "" &&
+      ctx.state.fname !== "" &&
+      ctx.state.id !== "" &&
+      element.id !== ""
     ) {
-      const {
-        name, fname, id, historical
-      } = ctx.state
-      ctx = ctx || window
+      const { name, fname, id, historical, remoteDay, photo } = ctx.state;
+      console.log("PHOTO", photo);
+      ctx = ctx || window;
 
       const payload = {
         name,
         fname,
         id_user: id,
         id_place: element.id,
-        historical
-      }
+        historical,
+        remoteDay,
+        photo
+      };
       fetch(server.address, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(payload),
         headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': config.token
+          "Content-Type": "application/json",
+          "x-access-token": config.token
         }
       })
         .then(res => res.json())
-        .then((data) => {
-          let redirect: boolean = true
-          payload.id_place == element.id && element.using
-            ? (redirect = false)
-            : null
+        .then(data => {
+          const redirect = !(payload.id_place == element.id && element.using);
           if (redirect) {
             AsyncStorage.setItem(
-              'USER',
+              "USER",
               JSON.stringify({
                 name: payload.name,
                 fname: payload.fname,
@@ -206,20 +169,65 @@ class PlacesScreen extends React.Component<Props, State> {
                 place: payload.id_place,
                 debug: ctx.state.debug,
                 historical: ctx.state.historical,
+                remoteDay: ctx.state.remoteDay,
+                photo: ctx.state.photo
               })
-            )
-            goTo(ctx, 'Leave')
+            );
+            goTo(ctx, "Leave");
           }
-        })
+        });
     }
-  }
+  };
+
+  handleList = () => {
+    const {
+      debug,
+      search,
+      selectedFloorIndex,
+      RERZonechecked,
+      ForestZonechecked,
+      MiddleZonechecked,
+      SouthZonechecked
+    } = this.state;
+
+    const floor = selectedFloorIndex === 0 ? 3 : 4;
+
+    const newT: string | Array<object> =
+      debug !== ""
+        ? debug.filter(e => {
+            let finalResult = true;
+
+            // Check the current selected floor
+            if (e.id[0] != floor) finalResult = false;
+
+            // Check the current selected zone
+            if (
+              (RERZonechecked && e.id[1] != 3) ||
+              (ForestZonechecked && e.id[1] != 1) ||
+              (MiddleZonechecked && e.id[1] != 5) ||
+              (SouthZonechecked && e.id[1] != 4)
+            ) {
+              finalResult = false;
+            }
+
+            for (const element in search) {
+              if (search[element] !== e.id[element]) {
+                finalResult = false;
+              }
+            }
+            return finalResult;
+          })
+        : debug;
+    return newT;
+  };
+
+  handleSearch = search => {
+    this.setState({ search });
+  };
 
   render() {
-    const navigation = this.props.navigation
+    const { navigation } = this.props;
     const {
-      fname,
-      name,
-      id,
       debug,
       selectedFloorIndex,
       loading,
@@ -227,80 +235,131 @@ class PlacesScreen extends React.Component<Props, State> {
       ForestZonechecked,
       SouthZonechecked,
       MiddleZonechecked,
-      isRemote
-    } = this.state
-    const FloorIndex = [3, 4]
+      selectedZoneIndex
+    } = this.state;
+    const FloorIndex = ["3ème étage", "4ème étage"];
 
+    const ZoneIndex = ["Zone verte", "Zone bleue", "Zone rouge"];
+
+    console.log(this.state);
+
+    // if (this.state.historical)
+    //   console.log(
+    //     this.state.historical.slice(
+    //       Math.max(this.state.historical.length - 5, 1)
+    //     )
+    //   );
     return (
       <ScrollView style={styles.view}>
-        <Card>
-          <FormLabel>{I18n.t('places.find')}</FormLabel>
-          <FormInput
-            onChangeText={this._handleSearch}
-            placeholder={I18n.t('places.search_place')}
-          />
-        </Card>
-        <ZoneCard
-          checked={RERZonechecked}
-          onPress={() => this.setState({ RERZonechecked: !RERZonechecked })}
-          checked1={ForestZonechecked}
-          onPress1={() => this.setState({ ForestZonechecked: !ForestZonechecked })}
-          checked2={SouthZonechecked}
-          onPress2={() => this.setState({ SouthZonechecked: !SouthZonechecked })}
-          checked3={MiddleZonechecked}
-          onPress3={() => this.setState({ MiddleZonechecked: !MiddleZonechecked })}
-        />
-        <Card>
+        <View style={{ margin: 40 }}>
           <Text
             h4
             style={{
-              textAlign: 'center',
-              fontSize: 16
+              textAlign: "center",
+              fontSize: 16,
+              fontWeight: "bold",
+              marginBottom: 20,
+              fontFamily: "Raleway"
             }}
           >
-            {I18n.t('places.floor')}
+            {I18n.t("places.floor")}
           </Text>
           <ButtonGroup
             onPress={this.updateFloorIndex}
             selectedIndex={selectedFloorIndex}
+            buttonStyle={{
+              backgroundColor: "white",
+              borderColor: "#2E89AD"
+            }}
+            containerStyle={{
+              height: 30,
+              borderRadius: 5
+            }}
+            selectedTextStyle={{ color: "#2E89AD", fontWeight: "bold" }}
+            textStyle={{ color: "black", fontFamily: "Raleway" }}
             buttons={FloorIndex}
           />
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-around"
+            }}
+          >
+            {/* Zone button group */}
+            <ButtonGroup
+              onPress={this.updateZoneIndex}
+              containerStyle={{
+                height: 30,
+                width: 300,
+                shadowOpacity: 0.4,
+                shadowRadius: 2,
+                shadowColor: "#3662A0",
+                shadowOffset: { height: 1, width: 0 },
+                borderRadius: 5
+              }}
+              selectedIndex={selectedZoneIndex}
+              buttonStyle={{
+                backgroundColor: "white",
+                borderColor: "#2E89AD"
+              }}
+              selectedTextStyle={{ color: "#2E89AD", fontWeight: "bold" }}
+              textStyle={{ color: "black", fontFamily: "Raleway" }}
+              buttons={ZoneIndex}
+            />
+          </View>
           <FetchPlacesButton
-            onPress={() => getPlaces(this, this.setPlaces, null, true)
-            }
+            onPress={() => getPlaces(this, this.setPlaces, null, true)}
           />
-        </Card>
-        <Card>
-          {debug !== '' && debug && !loading ? (
+          {/* <GradientBtn /> */}
+        </View>
+        <Text
+          h4
+          style={{
+            textAlign: "center",
+            fontSize: 16,
+            fontWeight: "bold",
+            fontFamily: "Raleway"
+          }}
+        >
+          Places disponibles
+        </Text>
+        <View style={{ margin: 40 }}>
+          {debug !== "" && debug && !loading ? (
             <List containerStyle={{ marginBottom: 20 }}>
-              {this._handleList()
-                .map(
-                  place => (place ? (
-                    <TouchableOpacity onPress={() => 
-                    AsyncStorage.getItem('USER', (err, result) => {
-                      if (JSON.parse(result).isRemote === false) return getPlaces(this, this.getUser, place)
-                    })}>
+              {this.handleList().map(
+                place =>
+                  place ? (
+                    <TouchableOpacity
+                      key={place.id}
+                      onPress={() => getPlaces(this, this.getUser, place)}
+                    >
                       <ListItem
                         key={place.id}
                         title={place.id}
+                        fontFamily="Raleway"
+                        rightIcon={
+                          <Icon name="plus" size={20} color="#2E89AD" />
+                        }
                       />
-                      </TouchableOpacity>
-                    ) : (
-                      'There is no free place for the moment !'
-                    )
-                  ))}
+                    </TouchableOpacity>
+                  ) : (
+                    "There is no free place for the moment !"
+                  )
+              )}
             </List>
           ) : (
             <ActivityIndicator
               style={{ marginTop: 20 }}
               size="large"
-              color="#5167A4"
+              color="#2E89AD"
             />
           )}
-        </Card>
+        </View>
       </ScrollView>
-    )
+    );
   }
 }
 
-export default PlacesScreen
+export default PlacesScreen;
