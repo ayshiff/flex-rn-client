@@ -75,6 +75,8 @@ For `server.json`:
 }
 ```
 
+(For android deployment use ```10.0.2.2``` for the host)
+
 And for `regex.json`:
 
 You also have to configure environment variables of the *flex server* project.
