@@ -1,10 +1,10 @@
-# **flex-rn-client** [![Build Status](https://app.bitrise.io/app/8ba0832124e4cdf2/status.svg?token=HTfEgn2kTcAN_FI2qXEqeQ&branch=feature/refactoring)](https://app.bitrise.io/app/8ba0832124e4cdf2)
+
+[![Build Status](https://app.bitrise.io/app/8ba0832124e4cdf2/status.svg?token=HTfEgn2kTcAN_FI2qXEqeQ&branch=feature/refactoring)](https://app.bitrise.io/app/8ba0832124e4cdf2)
 [![Coverage Status](https://coveralls.io/repos/github/ayshiff/flex-rn-client/badge.svg?branch=master)](https://coveralls.io/github/ayshiff/flex-rn-client?branch=master)
 [![CircleCI](https://circleci.com/gh/ayshiff/flex-rn-client.svg?style=svg)](https://circleci.com/gh/ayshiff/flex-rn-client)
+![Flex-Office](assets/Presentation.jpg?raw=true) 
 
 Simple mobile client in React-Native for **flex-server** project
-
-![Flex-Office](assets/flexoffice.png?raw=true)
 
 # Steps to follow
 
@@ -48,7 +48,7 @@ You will also need to install the Xcode Command Line Tools. Open Xcode, then cho
 Run ```react-native run-ios``` inside your React Native project folder:
 ```
 cd flex-rn-client
-npm install
+yarn
 react-native run-ios
 ```
 
@@ -103,17 +103,16 @@ Inside `gradle.properties`.
 (This is a temporaly fix and it will be fixed in the most recents versions of react-native !)
 
 
+# ScreenShots
+
+![Flex-Office](assets/flexoffice.png?raw=true)
+
 # Project Structure
 
 ```
 .
 ├── App.js
 ├── Components
-│   ├── Home
-│   │   ├── HomeScreen.js
-│   │   ├── HomeScreenStyles.js
-│   │   └── components
-│   │       └── HomeButton.js
 │   ├── Leave
 │   │   ├── LeaveScreen.js
 │   │   ├── LeaveScreenStyles.js
@@ -132,33 +131,42 @@ Inside `gradle.properties`.
 │   │   │   ├── PlacesScreen.js
 │   │   │   └── components
 │   │   │       ├── FetchPlacesButton.js
-│   │   │       └── ZoneCard.js
+│   │   │       ├── ZoneCard.js
+│   │   │       └── styles
+│   │   │           └── FetchPlacesButtonStyle.js
 │   │   ├── ProfileScreen.js
 │   │   ├── ProfileScreenStyles.js
 │   │   ├── Users
 │   │   │   ├── UsersScreen.js
 │   │   │   └── components
 │   │   │       ├── FindPlacesCard.js
-│   │   │       └── ListPlaces.js
+│   │   │       ├── ListPlaces.js
+│   │   │       └── styles
+│   │   │           └── FindPlacesCardStyle.js
+│   │   ├── animation.json
 │   │   └── components
 │   │       ├── HeaderCard.js
 │   │       ├── ManualInsertionCard.js
-│   │       └── QRCodeCard.js
-│   └── Scan
-│       ├── ScanScreen.js
-│       └── ScanScreenStyles.js
+│   │       ├── QRCodeCard.js
+│   │       ├── QRCodeComponent.js
+│   │       └── styles
+│   │           ├── HeaderCardStyle.js
+│   │           ├── ManualInsertionCardStyle.js
+│   │           └── QRCodeCardStyle.js
+│   └── Settings
+│       ├── SettingsScreen.js
+│       ├── SettingsScreenStyles.js
+│       └── components
+│           ├── DeconnectionButton.js
+│           └── styles
+│               └── DeconnectionButtonStyle.js
 ├── Navigation
-│   └── NavigationApp.js
+│   ├── NavigationApp.js
+│   └── components
+│       ├── ProfileImage.js
+│       └── reducer.js
 ├── README.md
 ├── __tests__
-│   ├── Home
-│   │   └── Home_test.js
-│   ├── Leave
-│   │   └──Leave_test.js
-│   ├── Login
-│   │   └── Login_test.js
-│   └── Profile
-│       └── Profile_test.js
 ├── utils
 │   ├── LocationNotice.js
 │   ├── OfflineNotice.js
