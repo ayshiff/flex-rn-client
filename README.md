@@ -184,6 +184,25 @@ Inside `gradle.properties`.
 ├── ios
 ├── package-lock.json
 ├── package.json
+├── views
+│   ├── Leave
+│   │   ├── LeaveScreen.js
+│   │   ├── LeaveScreenStyles.js
+│   │   └── LeaveScreenType.js
+│   ├── Login
+│   │   ├── LoginScreen.js
+│   │   ├── LoginScreenStyles.js
+│   │   └── LoginScreenType.js
+│   ├── Places
+│   │   └── PlacesScreen.js
+│   ├── Profile
+│   │   ├── ProfileScreen.js
+│   │   └── ProfileScreenStyles.js
+│   ├── Settings
+│   │   ├── SettingsScreen.js
+│   │   └── SettingsScreenStyles.js
+│   └── Users
+│       └── UsersScreen.js
 └── yarn.lock
 ```
 
